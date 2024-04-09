@@ -10,8 +10,7 @@ count = 0
 
 for file in wav_files:
     before_path = file
-    text_name = file.replace(".wav", "") 
-    data_file = open(f"{text_name}.txt", 'r')
+    data_file = open(f"{file.replace(".wav", "")}.txt", 'r')
     after_name = f"{data_file.read()}"
     data_file.close()
     after_name = f"{after_name[0:20]}"
@@ -21,7 +20,7 @@ for file in wav_files:
     after_name = f"{after_name}.wav"
     dir = f"{folder_path}/renamed_files/"
     os.makedirs(dir, exist_ok=True)
-    after_path = f"{folder_path}/renamed_files/{after_name}"
+    after_path = f"{dir}{after_name}"
     os.rename(before_path, after_path)
     count += 1
 print(f"{count}個のファイルの名称を変更しました。")
