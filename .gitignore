@@ -1,3 +1,5 @@
 /build/
 /dist/
 *.spec
+/files/
+/音声/
