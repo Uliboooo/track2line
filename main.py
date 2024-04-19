@@ -16,11 +16,8 @@ while True:
     for file in wav_files: #fileは音声ファイルのパス
         file_name = file.replace(".wav", "")
         lines = read_lines_textfile(file_name)
-        lines_last_character = lines[-1] #末字
-        if lines_last_character == "/":
-            lines = lines.replace("/", "")
-        if lines_last_character == "\\":
-            lines = lines.replace("\\", "")
+        lines = lines.replace("/", "")
+        lines = lines.replace("\\", "")
         voice_file_path = os.path.join(renamed_files_path, f"{lines}.wav")
         os.rename(file, voice_file_path)
         count += 1
