@@ -1,5 +1,3 @@
-# condi
-
 import os
 import glob
 
