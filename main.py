@@ -1,8 +1,10 @@
+# condi
+
 import os
 import glob
 
 def read_lines_textfile(file_name):
-    data_file = open(f"{file_name}.txt", 'r')
+    data_file = open(f"{file_name}.txt", 'r', encoding='utf-8')
     return data_file.read()[0:20]
 
 while True:
