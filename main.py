@@ -4,12 +4,9 @@ import glob
 
 def read_lines_textfile(file_name):
     data_file = open(f"{file_name}.txt", 'r', encoding='utf-8')
-    data_file = data_file.read()
-    data_file = re.sub(r'[\\/:*?"<>|]+','',data_file)
+    data_file = re.sub(r'[\\/:*?"<>|]+', '', data_file.read())
     data_file = data_file.replace("\n", "")
     data_file = data_file[0:20]
-    # data_file = data_file.replace("/", "")
-    # data_file = data_file.replace("\\", "")
     return data_file
 
 while True:
