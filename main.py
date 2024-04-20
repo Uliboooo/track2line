@@ -1,9 +1,15 @@
 import os
+import re
 import glob
 
 def read_lines_textfile(file_name):
     data_file = open(f"{file_name}.txt", 'r', encoding='utf-8')
-    return data_file.read()[0:20]
+    data_file = data_file.read()
+    data_file = data_file[0:20]
+    # data_file = data_file.replace("/", "")
+    # data_file = data_file.replace("\\", "")
+    data_file = re.sub(r'[\\/:*?"<>|]+','',data_file)
+    return data_file
 
 while True:
     print("フォルダのパスを入力してください。")
@@ -16,8 +22,6 @@ while True:
     for file in wav_files: #fileは音声ファイルのパス
         file_name = file.replace(".wav", "")
         lines = read_lines_textfile(file_name)
-        lines = lines.replace("/", "")
-        lines = lines.replace("\\", "")
         voice_file_path = os.path.join(renamed_files_path, f"{lines}.wav")
         os.rename(file, voice_file_path)
         count += 1
