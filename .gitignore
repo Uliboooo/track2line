@@ -2,4 +2,11 @@
 /dist/
 *.spec
 /files/
-/音声/
+.DS_Store
+/release/
+/release/
+.python_files/
+
+# Added by cargo
+
+/target
