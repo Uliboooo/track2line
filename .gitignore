@@ -1,8 +1,7 @@
-/build/
-/dist/
-*.spec
-/files/
-/音声/
+/python_files/target/
+/python_files/README.md
+
+# Added by cargo
+
+/target
 .DS_Store
-/release/
-/release/

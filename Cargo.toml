@@ -1,0 +1,7 @@
+[package]
+name = "voicefile_name_changer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+get_input = { git = "https://github.com/ulibo-yuki/get_input"}
