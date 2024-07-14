@@ -42,7 +42,7 @@ fn get_files_list(path: &Path) -> Result<fs::ReadDir, ErrorCodeList>{
 
 fn get_txt_content(file_path: &Path) -> Result<String, ErrorCodeList> {
     match fs::read_to_string(file_path) {
-        Ok(content) => Ok( content.get(0..20).unwrap_or(&content).to_string()),
+        Ok(content) => Ok(content.chars().take(20).collect()),
         Err(_) => Err(ErrorCodeList::FailedGetTxtContent)
     }
 }
@@ -80,7 +80,6 @@ fn path_to_string(path: &Path) -> Result<String, ErrorCodeList> {
     if let Some(filename) = path.file_name() {
         if let Some(filename_str) = filename.to_str() {
             Ok(filename_str.to_string())
-            // println!("Filename: {}", filename_string);
         } else {
             Err(ErrorCodeList::FailedConvert)
         }
@@ -91,7 +90,7 @@ fn path_to_string(path: &Path) -> Result<String, ErrorCodeList> {
 
 fn show_confirm_list(old_path: &Path, new_path: &Path) -> Result<(), ErrorCodeList>{
     println!(
-        "{:width$}  ---> {}",
+        "{:width$} ---> {}",
         match path_to_string(old_path) {
             Ok(path_string) => path_string,
             Err(_) => return Err(ErrorCodeList::FailedShowList)
@@ -99,8 +98,9 @@ fn show_confirm_list(old_path: &Path, new_path: &Path) -> Result<(), ErrorCodeLi
         match path_to_string(new_path) {
             Ok(path_string) => path_string,
             Err(_) => return Err(ErrorCodeList::FailedShowList)
-        }, width=10);
-    // }
+        },
+        width=20,
+    );
     Ok(())
 }
 
