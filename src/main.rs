@@ -9,7 +9,8 @@ enum ErrorCodeList {
     NoneExtension,
     NonePath,
     FailedRename,
-    FailedGetAudioPath,
+    FailedConvert,
+    FailedShowList,
 }
 
 impl ErrorCodeList {
@@ -21,9 +22,15 @@ impl ErrorCodeList {
             ErrorCodeList::NoneExtension => "None Extension",
             ErrorCodeList::NonePath => "None Path",
             ErrorCodeList::FailedRename => "Failed Rename",
-            ErrorCodeList::FailedGetAudioPath => "Failed Get Audio Path",
+            ErrorCodeList::FailedConvert => "Failed Convert",
+            ErrorCodeList::FailedShowList => "Failed Show List",
         }
     }
+}
+
+struct FilePathList {
+    old_path: PathBuf,
+    new_path: PathBuf,
 }
 
 fn get_files_list(path: &Path) -> Result<fs::ReadDir, ErrorCodeList>{
@@ -56,28 +63,56 @@ fn get_audio_path(entry: Result<DirEntry, std::io::Error>) -> Result<PathBuf, Er
                 if extension == "wav" {
                     Ok(path)
                 } else {
-                    Err(ErrorCodeList::FailedGetAudioPath)
+                    Err(ErrorCodeList::NoneExtension)
                 }
             } else {
                 Err(ErrorCodeList::NoneExtension)
             }
         },
-        Err(entry) => {
-            println!("{}", entry.to_string());
+        Err(_) => {
             Err(ErrorCodeList::NonePath)
         },
     }
     
 }
 
+fn path_to_string(path: &Path) -> Result<String, ErrorCodeList> {
+    if let Some(filename) = path.file_name() {
+        if let Some(filename_str) = filename.to_str() {
+            Ok(filename_str.to_string())
+            // println!("Filename: {}", filename_string);
+        } else {
+            Err(ErrorCodeList::FailedConvert)
+        }
+    } else {
+        Err(ErrorCodeList::FailedConvert)
+    }
+}
+
+fn show_confirm_list(old_path: &Path, new_path: &Path) -> Result<(), ErrorCodeList>{
+    println!(
+        "{:width$}  ---> {}",
+        match path_to_string(old_path) {
+            Ok(path_string) => path_string,
+            Err(_) => return Err(ErrorCodeList::FailedShowList)
+        },
+        match path_to_string(new_path) {
+            Ok(path_string) => path_string,
+            Err(_) => return Err(ErrorCodeList::FailedShowList)
+        }, width=10);
+    // }
+    Ok(())
+}
+
 fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeList>{
     let mut count = 0;
+    let mut list = Vec::<FilePathList>::new();
     for entry in file_path_list {
         let audio_path = match get_audio_path(entry){ //オーディオファイルのパスを取得
             Ok(path) => path,
             Err(code) => match code {
-                ErrorCodeList::FailedGetAudioPath => continue,
-                _ => return Err(ErrorCodeList::NoneExtension)
+                ErrorCodeList::NoneExtension => continue,
+                _ => return Err(code)
             },
         };
         let new_audio_file_name = format!("{}.wav", //新しいオーディオファイルの名前をテキストファイルから取得
@@ -86,16 +121,29 @@ fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeL
                 Err(_) => return Err(ErrorCodeList::FailedGetTxtContent)
             }.trim()
         );
+        let new_audio_path = Path::new(parent_path).join("renamed_files").join(new_audio_file_name); //新しいパスを生成
+        list.push(FilePathList{
+            old_path: audio_path.clone(),
+            new_path: new_audio_path.clone(),
+        });
         match create_folder(&Path::new(parent_path).join("renamed_files")) { //配置用のフォルダ
             Ok(_) => {},
             Err(code) => return Err(code),
         }
-        let new_audio_path = Path::new(parent_path).join("renamed_files").join(new_audio_file_name); //新しいパスを生成
-        match fs::rename(audio_path, new_audio_path) {
+        match show_confirm_list(&audio_path, &new_audio_path) {
             Ok(_) => {},
-            Err(_) => return Err(ErrorCodeList::FailedRename)
+            Err(code) => return Err(code),
+        };
+    }
+    println!("本当に変更しますか?(y/n)");
+    if get_input() == "y".to_string() {
+        for path_vec in list {
+            match fs::rename(&path_vec.old_path, &path_vec.new_path) {
+                Ok(_) => {},
+                Err(_) => return Err(ErrorCodeList::FailedRename)
+            }
+            count += 1
         }
-        count += 1;
     }
     Ok(count)
 }
