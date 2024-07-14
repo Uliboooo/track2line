@@ -1,5 +1,5 @@
-use std::fs::{self, ReadDir,};
-use std::path::Path;
+use std::fs::{self, DirEntry, ReadDir};
+use std::path::{Path, PathBuf};
 use get_input::get_input;
 
 enum ErrorCodeList {
@@ -9,6 +9,7 @@ enum ErrorCodeList {
     NoneExtension,
     NonePath,
     FailedRename,
+    FailedGetAudioPath,
 }
 
 impl ErrorCodeList {
@@ -19,7 +20,8 @@ impl ErrorCodeList {
             ErrorCodeList::FailedCreateFile => "Failed Create File",
             ErrorCodeList::NoneExtension => "None Extension",
             ErrorCodeList::NonePath => "None Path",
-            ErrorCodeList::FailedRename => "FailedRename",
+            ErrorCodeList::FailedRename => "Failed Rename",
+            ErrorCodeList::FailedGetAudioPath => "Failed Get Audio Path",
         }
     }
 }
@@ -46,37 +48,49 @@ fn create_folder(input_path: &Path) -> Result<(), ErrorCodeList> {
     }
 }
 
+fn get_audio_path(entry: Result<DirEntry, std::io::Error>) -> Result<PathBuf, ErrorCodeList>{
+    match entry {
+        Ok(entry) => {
+            let path = entry.path();
+            if let Some(extension) = path.extension() {
+                if extension == "wav" {
+                    Ok(path)
+                } else {
+                    Err(ErrorCodeList::FailedGetAudioPath)
+                }
+            } else {
+                Err(ErrorCodeList::NoneExtension)
+            }
+        },
+        Err(entry) => {
+            println!("{}", entry.to_string());
+            Err(ErrorCodeList::NonePath)
+        },
+    }
+    
+}
+
 fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeList>{
     let mut count = 0;
     for entry in file_path_list {
-        let audio_path = match entry {
-            Ok(entry) => {
-                let path = entry.path();
-                if let Some(extension) = path.extension() {
-                    if extension == "wav" {
-                        path
-                    } else {
-                        continue;
-                    }
-                } else {
-                    return Err(ErrorCodeList::NoneExtension)
-                }
+        let audio_path = match get_audio_path(entry){ //オーディオファイルのパスを取得
+            Ok(path) => path,
+            Err(code) => match code {
+                ErrorCodeList::FailedGetAudioPath => continue,
+                _ => return Err(ErrorCodeList::NoneExtension)
             },
-            Err(_) => return Err(ErrorCodeList::NonePath),
         };
-        let txt_path = audio_path.with_extension("txt");
-        let txt_content = get_txt_content(&txt_path);
-        let new_audio_file_name = format!("{}.wav",
-            match txt_content {
+        let new_audio_file_name = format!("{}.wav", //新しいオーディオファイルの名前をテキストファイルから取得
+            match get_txt_content(&audio_path.with_extension("txt")) {
                 Ok(content) => content,
                 Err(_) => return Err(ErrorCodeList::FailedGetTxtContent)
             }.trim()
         );
-        match create_folder(&Path::new(parent_path).join("renamed_files")) {
+        match create_folder(&Path::new(parent_path).join("renamed_files")) { //配置用のフォルダ
             Ok(_) => {},
             Err(code) => return Err(code),
         }
-        let new_audio_path = Path::new(parent_path).join("renamed_files").join(new_audio_file_name);
+        let new_audio_path = Path::new(parent_path).join("renamed_files").join(new_audio_file_name); //新しいパスを生成
         match fs::rename(audio_path, new_audio_path) {
             Ok(_) => {},
             Err(_) => return Err(ErrorCodeList::FailedRename)
