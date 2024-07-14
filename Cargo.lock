@@ -9,7 +9,7 @@ source = "git+https://github.com/ulibo-yuki/get_input#733a6ec6c47df0d73099784119
 
 [[package]]
 name = "voicefile_name_changer"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "get_input",
 ]
