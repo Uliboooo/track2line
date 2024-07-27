@@ -1,29 +1,27 @@
 use get_input::get_input;
+use std::fmt;
 use std::fs::{self, DirEntry, ReadDir};
 use std::path::{Path, PathBuf};
-
 enum ErrorCodeList {
-    FailedGetFilesList,
     FailedGetTxtContent,
     FailedCreateFile,
-    NoneExtension,
-    NonePath,
+    NoExtension,
+    DirEntryError(std::io::Error),
     FailedRename,
     FailedConvert,
     FailedShowList,
 }
 
-impl ErrorCodeList {
-    fn to_string(&self) -> &str {
+impl fmt::Display for ErrorCodeList {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ErrorCodeList::FailedGetFilesList => "Failed to get files list",
-            ErrorCodeList::FailedGetTxtContent => "Failed to get TXT content",
-            ErrorCodeList::FailedCreateFile => "Failed Create File",
-            ErrorCodeList::NoneExtension => "None Extension",
-            ErrorCodeList::NonePath => "None Path",
-            ErrorCodeList::FailedRename => "Failed Rename",
-            ErrorCodeList::FailedConvert => "Failed Convert",
-            ErrorCodeList::FailedShowList => "Failed Show List",
+            ErrorCodeList::FailedGetTxtContent => write!(f, "Failed to get text content"),
+            ErrorCodeList::FailedCreateFile => write!(f, "Failed to create file"),
+            ErrorCodeList::NoExtension => write!(f, "File has no extension"),
+            ErrorCodeList::DirEntryError(error) => write!(f, "Failed to read dir entry: {error}"),
+            ErrorCodeList::FailedRename => write!(f, "Failed to rename"),
+            ErrorCodeList::FailedConvert => write!(f, "Failed to convert"),
+            ErrorCodeList::FailedShowList => write!(f, "Failed to show list"),
         }
     }
 }
@@ -33,11 +31,8 @@ struct FilePathList {
     new_path: PathBuf,
 }
 
-fn get_files_list(path: &Path) -> Result<fs::ReadDir, ErrorCodeList> {
-    match fs::read_dir(path) {
-        Ok(list) => Ok(list),
-        Err(_) => Err(ErrorCodeList::FailedGetFilesList),
-    }
+fn get_files_list(path: &Path) -> Option<fs::ReadDir> {
+    fs::read_dir(path).ok()
 }
 
 fn get_txt_content(file_path: &Path) -> Result<String, ErrorCodeList> {
@@ -56,46 +51,23 @@ fn create_folder(input_path: &Path) -> Result<(), ErrorCodeList> {
 }
 
 fn get_audio_path(entry: Result<DirEntry, std::io::Error>) -> Result<PathBuf, ErrorCodeList> {
-    match entry {
-        Ok(entry) => {
-            let path = entry.path();
-            if let Some(extension) = path.extension() {
-                if extension == "wav" {
-                    Ok(path)
-                } else {
-                    Err(ErrorCodeList::NoneExtension)
-                }
-            } else {
-                Err(ErrorCodeList::NoneExtension)
-            }
-        }
-        Err(_) => Err(ErrorCodeList::NonePath),
-    }
+    Some(entry.map_err(ErrorCodeList::DirEntryError)?.path())
+        .filter(|path| path.extension().is_some_and(|ext| ext == "wav"))
+        .ok_or(ErrorCodeList::NoExtension)
 }
 
 fn path_to_string(path: &Path) -> Result<String, ErrorCodeList> {
-    if let Some(filename) = path.file_name() {
-        if let Some(filename_str) = filename.to_str() {
-            Ok(filename_str.to_string())
-        } else {
-            Err(ErrorCodeList::FailedConvert)
-        }
-    } else {
-        Err(ErrorCodeList::FailedConvert)
-    }
+    path.file_name()
+        .and_then(|filename| filename.to_str())
+        .map(|s| s.to_string())
+        .ok_or(ErrorCodeList::FailedConvert)
 }
 
 fn show_confirm_list(old_path: &Path, new_path: &Path) -> Result<(), ErrorCodeList> {
     println!(
         "{:width$} ---> {}",
-        match path_to_string(old_path) {
-            Ok(path_string) => path_string,
-            Err(_) => return Err(ErrorCodeList::FailedShowList),
-        },
-        match path_to_string(new_path) {
-            Ok(path_string) => path_string,
-            Err(_) => return Err(ErrorCodeList::FailedShowList),
-        },
+        path_to_string(old_path).map_err(|_| ErrorCodeList::FailedShowList)?,
+        path_to_string(new_path).map_err(|_| ErrorCodeList::FailedShowList)?,
         width = 20,
     );
     Ok(())
@@ -109,17 +81,15 @@ fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeL
             //オーディオファイルのパスを取得
             Ok(path) => path,
             Err(code) => match code {
-                ErrorCodeList::NoneExtension => continue,
+                ErrorCodeList::NoExtension => continue,
                 _ => return Err(code),
             },
         };
         let new_audio_file_name = format!(
             "{}.wav", //新しいオーディオファイルの名前をテキストファイルから取得
-            match get_txt_content(&audio_path.with_extension("txt")) {
-                Ok(content) => content,
-                Err(_) => return Err(ErrorCodeList::FailedGetTxtContent),
-            }
-            .trim()
+            get_txt_content(&audio_path.with_extension("txt"))
+                .map_err(|_| ErrorCodeList::FailedGetTxtContent)?
+                .trim()
         );
         let new_audio_path = Path::new(parent_path)
             .join("renamed_files")
@@ -128,23 +98,14 @@ fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeL
             old_path: audio_path.clone(),
             new_path: new_audio_path.clone(),
         });
-        match create_folder(&Path::new(parent_path).join("renamed_files")) {
-            //配置用のフォルダ
-            Ok(_) => {}
-            Err(code) => return Err(code),
-        }
-        match show_confirm_list(&audio_path, &new_audio_path) {
-            Ok(_) => {}
-            Err(code) => return Err(code),
-        };
+        create_folder(&Path::new(parent_path).join("renamed_files"))?;
+        show_confirm_list(&audio_path, &new_audio_path)?;
     }
     println!("本当に変更しますか?(y/n)");
     if get_input() == "y".to_string() {
         for path_vec in list {
-            match fs::rename(&path_vec.old_path, &path_vec.new_path) {
-                Ok(_) => {}
-                Err(_) => return Err(ErrorCodeList::FailedRename),
-            }
+            fs::rename(&path_vec.old_path, &path_vec.new_path)
+                .map_err(|_| ErrorCodeList::FailedRename)?;
             count += 1
         }
     }
@@ -156,25 +117,19 @@ fn main() {
         println!("パスを入力して下さい。");
         let input_str = get_input();
         let input_path = Path::new(&input_str);
-        let files_list = match get_files_list(input_path) {
-            Ok(list) => {
-                // println!("リストの取得に成功");
-                list
-            }
-            Err(code) => {
-                println!("{}\n", code.to_string());
-                continue;
-            }
+        let Some(files_list) = get_files_list(input_path) else {
+            eprintln!("ERROR: Failed to get files list");
+            continue;
         };
         match rename(files_list, input_path) {
-            Ok(count) => println!("{}個のファイルを変換しました。", count),
+            Ok(count) => println!("{count}個のファイルを変換しました。"),
             Err(code) => {
-                println!("{}\n", code.to_string());
+                eprintln!("ERROR: {code}");
                 continue;
             }
         };
         println!("もう一度使用しますか?(y/n)");
-        if get_input() == "n".to_string() {
+        if get_input() == "n" {
             break;
         }
     }
