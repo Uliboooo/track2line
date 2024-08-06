@@ -2,6 +2,7 @@ use get_input::get_input;
 use std::fmt;
 use std::fs::{self, DirEntry, ReadDir};
 use std::path::{Path, PathBuf};
+
 enum ErrorCodeList {
     FailedGetTxtContent,
     FailedCreateFile,
@@ -102,7 +103,7 @@ fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeL
         show_confirm_list(&audio_path, &new_audio_path)?;
     }
     println!("本当に変更しますか?(y/n)");
-    if get_input() == "y".to_string() {
+    if get_input() == "y" {
         for path_vec in list {
             fs::rename(&path_vec.old_path, &path_vec.new_path)
                 .map_err(|_| ErrorCodeList::FailedRename)?;
