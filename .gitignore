@@ -1,5 +1,7 @@
-/python_files/target/
-/python_files/README.md
+/python_files/
+/serif_tests
+/test_files
+/.vscode
 
 # Added by cargo
 
