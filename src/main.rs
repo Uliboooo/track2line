@@ -1,7 +1,6 @@
 use clap::Parser;
 // use colored::*;
 use get_input::get_input;
-use serde_derive::{Deserialize, Serialize};
 use std::env;
 use std::fmt;
 use std::fs::{self, DirEntry, ReadDir};
@@ -22,29 +21,15 @@ struct Args {
     /// ```
     /// ./voicefile_name_changer -a mp3
     /// ```
-    #[arg(short = 'a', long = "audo", help = "change audioo extension")]
+    #[arg(short = 'a', long = "audio", help = "change audio file extension")]
     audio_extension: Option<String>,
 
     /// セリフ(テキスト)ファイルの拡張子を変更するか
     /// ```
     /// ./voicefile_name_changer -t rtf
     /// ```
-    #[arg(short = 't', long = "text", help = "change audioo extension")]
+    #[arg(short = 't', long = "text", help = "change text file extension")]
     txt_extension: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct AppConfig {
-    audio_extension: String,
-    txt_extension: String,
-}
-impl Default for AppConfig {
-    fn default() -> Self {
-        Self {
-            audio_extension: "wav".to_string(),
-            txt_extension: "txt".to_string(),
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -196,11 +181,11 @@ static TXT_EXTENSION: OnceLock<String> = OnceLock::new();
 /// //target file list
 /// $ ls
 /// 1.txt   1.wav   2.txt   2.wav   3.txt   3.wav   voicefile_name_changer
-/// user@pc target % cat 1.txt 2.txt 3.txt
+/// $ cat 1.txt 2.txt 3.txt
 /// first
 /// second
 /// three
-/// 
+///
 /// //rename with this tool
 /// //this tool run
 /// $ ./voicefile_name_changer
