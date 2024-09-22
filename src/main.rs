@@ -1,19 +1,53 @@
 use clap::Parser;
 // use colored::*;
 use get_input::get_input;
+use serde_derive::{Deserialize, Serialize};
 use std::env;
 use std::fmt;
 use std::fs::{self, DirEntry, ReadDir};
 use std::io::stdout;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::sync::OnceLock;
 
 #[derive(Parser)]
 struct Args {
-    /// フォルダを指定
+    /// フォルダを指定 第一引数にパスを指定
+    /// ```
+    /// ./voicefile_name_changer folder_path
+    /// ```
     folder_path: Option<String>,
+
+    /// 音声ファイルの拡張子を変更するか
+    /// ```
+    /// ./voicefile_name_changer -a mp3
+    /// ```
+    #[arg(short = 'a', long = "audo", help = "change audioo extension")]
+    audio_extension: Option<String>,
+
+    /// セリフ(テキスト)ファイルの拡張子を変更するか
+    /// ```
+    /// ./voicefile_name_changer -t rtf
+    /// ```
+    #[arg(short = 't', long = "text", help = "change audioo extension")]
+    txt_extension: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct AppConfig {
+    audio_extension: String,
+    txt_extension: String,
+}
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            audio_extension: "wav".to_string(),
+            txt_extension: "txt".to_string(),
+        }
+    }
+}
+
+#[derive(Debug)]
 enum ErrorCodeList {
     FailedGetPath,
     FailedGetTxtContent,
@@ -64,7 +98,11 @@ fn create_folder(input_path: &Path) -> Result<(), ErrorCodeList> {
 
 fn get_audio_path(entry: Result<DirEntry, std::io::Error>) -> Result<PathBuf, ErrorCodeList> {
     Some(entry.map_err(ErrorCodeList::DirEntryError)?.path())
-        .filter(|path| path.extension().is_some_and(|ext| ext == "wav"))
+        .filter(|path| {
+            path.extension().is_some_and(|ext| {
+                ext.to_str() == Some(AUDIO_EXTENSION.get_or_init(|| "wav".to_string()))
+            })
+        })
         .ok_or(ErrorCodeList::NoExtension)
 }
 
@@ -106,10 +144,17 @@ fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeL
         };
         // 新しいオーディオファイルの名前をテキストファイルから取得
         let new_audio_file_name = format!(
-            "{}.wav",
-            get_txt_content(&audio_path.with_extension("txt"))
-                .map_err(|_| ErrorCodeList::FailedGetTxtContent)?
-                .trim()
+            "{}.{audio_extension}",
+            get_txt_content(&audio_path.with_extension(match TXT_EXTENSION.get() {
+                Some(s) => s,
+                None => "txt",
+            }))
+            .map_err(|_| ErrorCodeList::FailedGetTxtContent)?
+            .trim(),
+            audio_extension = match AUDIO_EXTENSION.get() {
+                Some(s) => s,
+                None => "wav",
+            }
         );
         // ファイル名とフォルダパスを結合して新しいファイルパスを指定
         let new_audio_path = Path::new(parent_path)
@@ -139,39 +184,69 @@ fn rename(file_path_list: ReadDir, parent_path: &Path) -> Result<i32, ErrorCodeL
     }
 }
 
+// 拡張子の設定
+static AUDIO_EXTENSION: OnceLock<String> = OnceLock::new();
+static TXT_EXTENSION: OnceLock<String> = OnceLock::new();
+
 /// ## Examples
-/// 
+///
 /// ### when place exefile in target directory.
-/// 
+///
 /// ```
 /// //target file list
-/// user@pc target % ls
+/// $ ls
 /// 1.txt   1.wav   2.txt   2.wav   3.txt   3.wav   voicefile_name_changer
-/// user@pc target % cat 1.txt 2.txt 3.txt 
+/// user@pc target % cat 1.txt 2.txt 3.txt
 /// first
 /// second
 /// three
+/// 
 /// //rename with this tool
 /// //this tool run
-/// user@pc ~ % ~/voicefile_name_changer
+/// $ ./voicefile_name_changer
 /// 1.wav                ---> first.wav
 /// 3.wav                ---> three.wav
 /// 2.wav                ---> second.wav
 /// 本当に変更しますか?(y/n)>y
 /// ```
-/// 
+///
 /// ### when set the argument as a path
-/// 
+///
 /// ```
-/// user@pc~ % ./voicefile_name_changer /target
+/// $ ./voicefile_name_changer /target
 /// 1.wav                ---> first.wav
 /// 3.wav                ---> three.wav
 /// 2.wav                ---> second.wav
 /// 本当に変更しますか?(y/n)>y
 /// ```
+///
+/// ### when audio file's arg is extensions other than wav
+///
+/// If you click on an executable file, you cannot specify an extension other than the default (wav, txt).
+///
+/// ```
+/// // use mp3 and rtf
+/// $ ./voicefile_name_changer -a mp3 -t rtf
+/// 1.mp3                ---> one.mp3
+/// 2.mp3                ---> two.mp3
+/// 3.mp3                ---> three.mp3
+/// 本当に変更しますか?(y/n)>n
+/// ```
+///
 fn main() {
-    // loop {
     let args = Args::parse();
+
+    let _ = AUDIO_EXTENSION.set(args.audio_extension.unwrap_or("wav".to_string()));
+    let _ = TXT_EXTENSION.set(args.txt_extension.unwrap_or("txt".to_string()));
+
+    if cfg!(debug_assertions) {
+        println!(
+            "The current audio extension is {:?}\nThe current txt extension is {:?}",
+            AUDIO_EXTENSION.get(),
+            TXT_EXTENSION.get(),
+        );
+    }
+
     // 引数にフォルダのパスがあった場合はそれを、ない場合はカレントディレクトリのパスを読む
     let work_path = match match args.folder_path {
         // 引数にパスがあった場合
