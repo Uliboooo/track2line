@@ -1,9 +1,5 @@
 # voicefile_name_changer
 
-## 既知の問題
-
-- wavファイル以外非対応
-
 ## 用途
 
 voisona Talk等で、出力された音声ファイルの名前を同名のテキストファイルを参照して変換するツールです。そのため、
@@ -19,17 +15,17 @@ voisona Talk等で、出力された音声ファイルの名前を同名のテ�
 
 ### 実行ファイルをターゲットディレクトリに配置するとき
 
-```zsh
-//target file list
-user@pc target % ls
+```
+// show file list
+$ ls
 1.txt   1.wav   2.txt   2.wav   3.txt   3.wav   voicefile_name_changer
-user@pc target % cat 1.txt 2.txt 3.txt 
+
+$ cat 1.txt 2.txt 3.txt 
 first
 second
 three
-//rename with this tool
-//this tool run
-user@pc ~ % ~/voicefile_name_changer
+
+$ ./voicefile_name_changer
 1.wav                ---> first.wav
 3.wav                ---> three.wav
 2.wav                ---> second.wav
@@ -38,12 +34,26 @@ user@pc ~ % ~/voicefile_name_changer
 
 ### パスを引数に設定するとき
 
-```zsh
-user@pc~ % ./voicefile_name_changer /target
+```
+$ ./voicefile_name_changer /target_folder_path
 1.wav                ---> first.wav
 3.wav                ---> three.wav
 2.wav                ---> second.wav
 本当に変更しますか?(y/n)>y
+```
+
+### wav, txt拡張子以外のファイルを扱う
+
+実行ファイルをターゲットディレクトリに配置するときは利用できません。
+
+```
+$ ls
+1.rtf   1.mp3   2.rtf   2.mp3   3.rtf   3.mp3   voicefile_name_changer
+
+$ ./voicefile_name_changer -a mp3 -t rtf /target_folder_path
+1.mp3                ---> one.mp3
+2.mp3                ---> two.mp3
+3.mp3                ---> three.mp3
 ```
 
 ## 免責事項
