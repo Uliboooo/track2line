@@ -272,3 +272,22 @@ fn main() {
         }
     };
 }
+
+fn get_file_list(dir_path: PathBuf) -> Result<(), ErrorCodeList> {
+    let file_list =  fs::read_dir(dir_path).map_err(|_| {ErrorCodeList::FailedGetPath})?;
+    // let goo = file_list.into_iter();
+    // let a = FilePathList { old_path: , new_path: todo!() }
+    let file_vec: Vec<FilePathList> = Vec::new();
+    for entry in file_list {
+        if entry.is_err() {
+            return Err(ErrorCodeList::FailedGetPath);
+        }
+        file_vec.push(FilePathList { old_path: entry.map_err(), new_path: () });
+    }
+    Ok(())
+}
+
+#[test]
+fn test() {
+    let test_dir_path = PathBuf::from("test_files");
+}
