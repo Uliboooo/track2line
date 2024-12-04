@@ -2,7 +2,7 @@
 /serif_tests
 /test_files
 /.vscode
-/test_folder
+# /test_folder
 
 # Added by cargo
 
