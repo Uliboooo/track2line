@@ -39,7 +39,7 @@ enum ErrorCodeList {
     FailedCreateFile,
     FailedConvert,
     ChangeCancel,
-    NotFoundChangableFiles,
+    NotFoundChangeableFiles,
     FailedGetFileName,
     FailedGetFileEx,
     FailedRename,
@@ -53,7 +53,7 @@ impl fmt::Display for ErrorCodeList {
             ErrorCodeList::FailedCreateFile => write!(f, "Failed to create file"),
             ErrorCodeList::FailedConvert => write!(f, "Failed to convert"),
             ErrorCodeList::ChangeCancel => write!(f, "cancel"),
-            ErrorCodeList::NotFoundChangableFiles => write!(f, "not found changable files"),
+            ErrorCodeList::NotFoundChangeableFiles => write!(f, "not found changeable files"),
             ErrorCodeList::FailedGetFileName => write!(f, "failed get file name."),
             ErrorCodeList::FailedGetFileEx => write!(f, "failed get file extension."),
             ErrorCodeList::NotFound => write!(f, "not found."),
@@ -111,7 +111,7 @@ struct ChangedSetAudioTxt {
 }
 
 /// ファイルのリストから同名の音声とセリフファイルをリスト化(Vec<SetAudioTxt)
-fn create_samename_list(
+fn create_same_name_list(
     list: Vec<PathBuf>,
     dir_path: PathBuf,
 ) -> Result<Vec<SetAudioTxt>, ErrorCodeList> {
@@ -180,7 +180,7 @@ fn create_samename_list(
         println!("{:?}", &file_set_list)
     }
     if file_set_list.is_empty() {
-        Err(ErrorCodeList::NotFoundChangableFiles)
+        Err(ErrorCodeList::NotFoundChangeableFiles)
     } else {
         Ok(file_set_list)
     }
@@ -225,14 +225,14 @@ fn create_new_file_list(
 
 fn process_directory(dir_path: &mut PathBuf) -> Result<String, ErrorCodeList> {
     // let list = get_file_list(dir_path).unwrap();
-    let list = remove_ignore_file(get_file_list(dir_path).unwrap()).unwrap();
+    let list = remove_ignore_file(get_file_list(dir_path)?)?;
     // dir_path.push("/renamed");
     let new_folder_path = dir_path.clone().join("renamed");
     let _succ_create_folder = create_folder(&new_folder_path).is_ok();
-    let same_name_list = create_samename_list(list, dir_path.to_path_buf())?;
-    let added_newname_list = create_new_file_list(same_name_list, new_folder_path)?;
-    if show_confirm_list(&added_newname_list)? {
-        rename(added_newname_list)?;
+    let same_name_list = create_same_name_list(list, dir_path.to_path_buf())?;
+    let added_new_name_list = create_new_file_list(same_name_list, new_folder_path)?;
+    if show_confirm_list(&added_new_name_list)? {
+        rename(added_new_name_list)?;
         Ok("success.".to_string())
     } else {
         println!("canceled.");
@@ -302,7 +302,7 @@ static TXT_EXTENSION: OnceLock<String> = OnceLock::new();
 
 /// ## Examples
 ///
-/// ### when place exefile in target directory.
+/// ### when place exe file in target directory.
 ///
 /// ```
 /// //target file list
@@ -391,10 +391,7 @@ fn main() {
 
     println!(
         "{}",
-        match result {
-            Ok(r) => r,
-            Err(e) => e.to_string(),
-        }
+        result.unwrap_or_else(|e| e.to_string())
     );
 }
 
@@ -410,7 +407,7 @@ mod tests {
         FsErrorFailedCreate,
     }
 
-    impl std::fmt::Display for TestError {
+    impl fmt::Display for TestError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match self {
                 TestError::FailedGetFileList => write!(f, "failed get dile list"),
@@ -445,10 +442,8 @@ mod tests {
             PathBuf::from("test_files/test/1.txt"),
         ];
         let removed_list = remove_ignore_file(list).unwrap();
-        // let same_file_list = create_samename_list(removed_list);
-        // println!("{:?}", removed_list);
 
-        let list_2 = create_samename_list(removed_list, PathBuf::from("test_files/test/"));
+        let list_2 = create_same_name_list(removed_list, PathBuf::from("test_files/test/"));
         let new_list =
             create_new_file_list(list_2.unwrap(), PathBuf::from("test_files/test/renamed"));
         // assert_eq!(list_2, vec![SetAudioTxt { audio_path: PathBuf::from("test_files/test/1.wav"), txt_path: PathBuf::from("1.txt") }]);
