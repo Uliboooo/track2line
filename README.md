@@ -13,6 +13,26 @@ voisona Talk等で、出力された音声ファイルの名前を同名のテ�
 
 音声ファイルの含まれたフォルダのパスを入力してください。実行すると、「renamed_files」というフォルダが作成され、変更済みの音声ファイルが移動されます。
 
+## インストール方法
+
+インストールというかパスをエイリアスに登録すると、フルパスで実行ファイルを指定しなくとも使用できるようになります。(Mac)
+
+1. 適当なフォルダに実行ファイルを置く
+2. その実行ファイルのパスをaliasに設定
+
+```zsh: install
+sudo cp ./voicefile_name_changer /usr/local/bin/;
+echo "alias vfnc='/usr/local/bin/voicefile_name_changer'" >> ~/.zshrc;
+source ~/.zshrc;
+```
+cp後のパスはダウンロードした実行ファイルのパスです。
+
+### 使い方
+
+```zsh: use
+vfnc /target_folder_path
+```
+
 ### 実行ファイルをターゲットディレクトリに配置するとき
 
 ```
