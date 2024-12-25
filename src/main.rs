@@ -303,8 +303,8 @@ static TXT_EXTENSION: OnceLock<String> = OnceLock::new();
 /// second
 /// three
 ///
-/// //rename with this tool
-/// //this tool run
+/// // rename with this tool
+/// // run
 /// $ ./voicefile_name_changer
 /// 1.wav                ---> first.wav
 /// 3.wav                ---> three.wav
