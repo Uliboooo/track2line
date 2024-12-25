@@ -4,9 +4,8 @@ use get_input::get_input;
 use std::env;
 use std::fmt;
 use std::fs::{self};
-use std::io::stdout;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::sync::OnceLock;
 
 #[derive(Parser)]
@@ -32,7 +31,7 @@ struct Args {
     txt_extension: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum ErrorCodeList {
     FailedGetPath,
     FailedGetTxtContent,
@@ -43,7 +42,7 @@ enum ErrorCodeList {
     FailedGetFileName,
     FailedGetFileEx,
     FailedRename,
-    NotFound,
+    // NotFound,
 }
 impl fmt::Display for ErrorCodeList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -56,7 +55,7 @@ impl fmt::Display for ErrorCodeList {
             ErrorCodeList::NotFoundChangeableFiles => write!(f, "not found changeable files"),
             ErrorCodeList::FailedGetFileName => write!(f, "failed get file name."),
             ErrorCodeList::FailedGetFileEx => write!(f, "failed get file extension."),
-            ErrorCodeList::NotFound => write!(f, "not found."),
+            // ErrorCodeList::NotFound => write!(f, "not found."),
             ErrorCodeList::FailedRename => write!(f, "failed rename file"),
         }
     }
@@ -64,8 +63,6 @@ impl fmt::Display for ErrorCodeList {
 
 fn get_file_list(dir_path: &PathBuf) -> Result<Vec<PathBuf>, ErrorCodeList> {
     let file_list = fs::read_dir(dir_path).map_err(|_| ErrorCodeList::FailedGetPath)?;
-    // let goo = file_list.into_iter();
-    // let a = FilePathList { old_path: , new_path: todo!() }
     let mut file_vec: Vec<PathBuf> = Vec::new();
     for entry in file_list {
         file_vec.push(match entry {
@@ -80,7 +77,6 @@ fn remove_ignore_file(list: Vec<PathBuf>) -> Result<Vec<PathBuf>, ErrorCodeList>
     let mut tmp_vec: Vec<PathBuf> = Vec::new();
     for path in list {
         let a = match (match path.extension() {
-            // 拡張子
             Some(e) => e,
             None => continue,
         })
@@ -141,21 +137,12 @@ fn create_same_name_list(
         // 音声かテキストかを判別
         file_set_list.push(
             if &file_ex.to_string_lossy() == AUDIO_EXTENSION.get_or_init(|| "wav".to_string()) {
-                // when audio
-                // let txt_file_name = PathBuf::from(format!(
-                //     "{}.{}",
-                //     file_name, // audio file name
-                //     TXT_EXTENSION.get_or_init(|| "txt".to_string())
-                // ));
-                // let txt_file_path = path.set_file_name("file_name");
                 let mut dir_path_2 = dir_path.clone();
                 dir_path_2.push(PathBuf::from(format!(
                     "{}.{}",
                     file_name, // audio file name
                     TXT_EXTENSION.get_or_init(|| "txt".to_string())
                 )));
-
-                // let txt_path = dir_path;
 
                 if dir_path_2.exists() {
                     // セリフファイルが存在
@@ -164,10 +151,10 @@ fn create_same_name_list(
                         txt_path: dir_path_2,
                     }
                 } else {
-                    if cfg!(test) {
-                        println!("{:?}", dir_path_2);
-                        return Err(ErrorCodeList::NotFound);
-                    }
+                    // if cfg!(test) {
+                    //     println!("{:?}", dir_path_2);
+                    //     return Err(ErrorCodeList::NotFound);
+                    // }
                     continue; // セリフファイルが存在しない場合
                 }
             } else {
@@ -199,19 +186,11 @@ fn create_new_file_list(
             println!("{} have", &file.txt_path.to_string_lossy(),);
         }
         let text_content = get_txt_content(&file.txt_path)?;
-        // if cfg!(test) {
-        //     println!(
-        //         "{} have {:?}",
-        //         &file.txt_path.to_string_lossy(),
-        //         text_content
-        //     );
-        // }
         let new_audio_path = PathBuf::from(&new_dir_path).join(format!(
             "{}.{}",
             text_content,
             AUDIO_EXTENSION.get_or_init(|| "wav".to_string())
         ));
-        // file.audio_path.set_file_name(text_content);
         tmp.push(ChangedSetAudioTxt {
             base: SetAudioTxt {
                 audio_path: file.audio_path,
@@ -224,11 +203,9 @@ fn create_new_file_list(
 }
 
 fn process_directory(dir_path: &mut PathBuf) -> Result<String, ErrorCodeList> {
-    // let list = get_file_list(dir_path).unwrap();
     let list = remove_ignore_file(get_file_list(dir_path)?)?;
-    // dir_path.push("/renamed");
     let new_folder_path = dir_path.clone().join("renamed");
-    let _succ_create_folder = create_folder(&new_folder_path).is_ok();
+    create_folder(&new_folder_path)?;
     let same_name_list = create_same_name_list(list, dir_path.to_path_buf())?;
     let added_new_name_list = create_new_file_list(same_name_list, new_folder_path)?;
     if show_confirm_list(&added_new_name_list)? {
@@ -257,7 +234,6 @@ fn get_txt_content(file_path: &Path) -> Result<String, ErrorCodeList> {
 
 /// 受け取ったパスにフォルダを作成
 fn create_folder(input_path: &PathBuf) -> Result<(), ErrorCodeList> {
-    // let path = input_path;
     match fs::create_dir_all(input_path) {
         Ok(_) => Ok(()),
         Err(_) => Err(ErrorCodeList::FailedCreateFile),
@@ -281,12 +257,11 @@ fn show_confirm_list(list: &Vec<ChangedSetAudioTxt>) -> Result<bool, ErrorCodeLi
             path_to_string(&item.base.audio_path)?,
             path_to_string(&item.new)?,
             width = 20,
-            // map_err(|_| ErrorCodeList::FailedShowList)
         );
     }
-    print!("ok?(y/n)>");
-    stdout().flush().unwrap();
-    Ok(get_input() != "n")
+    // print!("ok?(y/n)>");
+    // stdout().flush().unwrap();
+    Ok(get_input("ok?(y/n)") != "n")
 }
 
 fn rename(list: Vec<ChangedSetAudioTxt>) -> Result<(), ErrorCodeList> {
@@ -389,21 +364,19 @@ fn main() {
 
     let result = process_directory(&mut work_path);
 
-    println!(
-        "{}",
-        result.unwrap_or_else(|e| e.to_string())
-    );
+    println!("{}", result.unwrap_or_else(|e| e.to_string()));
 }
 
 #[cfg(test)]
-mod tests {
+mod test_s {
     use super::*;
-    use std::vec;
+    use std::{io::Write, vec};
 
     enum TestError {
         FailedGetFileList,
         FailedGetFile,
-        FailedCopy,
+        // FailedCopy,
+        FailedInit,
         FsErrorFailedCreate,
     }
 
@@ -412,8 +385,9 @@ mod tests {
             match self {
                 TestError::FailedGetFileList => write!(f, "failed get dile list"),
                 TestError::FailedGetFile => write!(f, "failed get file"),
-                TestError::FailedCopy => write!(f, "failed copy"),
+                // TestError::FailedCopy => write!(f, "failed copy"),
                 TestError::FsErrorFailedCreate => write!(f, "failed create"),
+                TestError::FailedInit => write!(f, "failed init"),
             }
         }
     }
@@ -460,56 +434,100 @@ mod tests {
         )
     }
 
-    fn copy_dir(from: &PathBuf, to: &Path) -> Result<(), TestError> {
-        let from_dir_files = fs::read_dir(from).map_err(|_| TestError::FailedGetFileList)?;
-        // let to_dir_list = fs::read_dir(to).map_err(|_| ErrorCodeList::ChangeCancel)?;
-        for file in from_dir_files {
-            let from_file_path = file.map_err(|_| TestError::FailedGetFile)?.path();
-            let to_path = to.join(from_file_path.file_name().unwrap());
-            fs::copy(from_file_path, to_path).map_err(|_| TestError::FailedCopy)?;
+    fn init_test_folder(dir: &Path) -> Result<(), (TestError, String)> {
+        let file_list = dir
+            .read_dir()
+            .map_err(|_| (TestError::FailedGetFileList, "".to_string()))?;
+        for file_path in file_list {
+            let path = file_path
+                .map_err(|_| (TestError::FailedGetFile, "".to_string()))?
+                .path();
+            if path.is_dir() {
+                fs::remove_dir_all(&path)
+                    .map_err(|_| (TestError::FailedInit, "failed delete folder".to_string()))?;
+                continue;
+            }
+            fs::remove_file(&path)
+                .map_err(|_| (TestError::FailedInit, path.to_string_lossy().to_string()))?;
         }
         Ok(())
     }
 
-    // /Users/yuki/Develop/Rust/voicefile_name_changer/test_files
-    // /Users/yuki/Develop/Rust/voicefile_name_changer/test_files/.template
-    // /Users/yuki/Develop/Rust/voicefile_name_changer/test_files/test
-    // #[test]
-    fn ready() -> Result<(), TestError> {
-        let env_path = env::current_dir().expect("error");
-        let base_path = env_path.join("test_files").join("template");
-        let test_folder_path = env_path.join("test_files").join("test");
+    fn create_test_files(dir: &Path) -> Result<(), TestError> {
+        let file_names = [
+            (PathBuf::from("1.wav"), ""),
+            (PathBuf::from("2.wav"), ""),
+            (PathBuf::from("3.wav"), ""),
+            (PathBuf::from("bar.wav"), ""),
+            (PathBuf::from("1.txt"), "one"),
+            (PathBuf::from("2.txt"), "two"),
+            (PathBuf::from("3.txt"), "three"),
+            (PathBuf::from("foo.txt"), "foo"),
+        ];
+        for file in file_names {
+            let file_path = dir.join(file.0);
+            let mut f = fs::File::create(&file_path).map_err(|_| TestError::FsErrorFailedCreate)?;
+            f.write_all(file.1.as_bytes())
+                .map_err(|_| TestError::FsErrorFailedCreate)?;
+        }
+        Ok(())
+    }
 
-        if !test_folder_path.exists() {
-            if let Err(e) = create_folder(&test_folder_path) {
-                eprintln!("error: {}", e);
-                return Err(TestError::FsErrorFailedCreate);
-            }
+    // fn copy_dir(from: &PathBuf, to: &Path) -> Result<(), TestError> {
+    //     let from_dir_files = fs::read_dir(from).map_err(|_| TestError::FailedGetFileList)?;
+    //     for file in from_dir_files {
+    //         let from_file_path = file.map_err(|_| TestError::FailedGetFile)?.path();
+    //         let to_path = to.join(from_file_path.file_name().unwrap());
+    //         fs::copy(from_file_path, to_path).map_err(|_| TestError::FailedCopy)?;
+    //     }
+    //     Ok(())
+    // }
+
+    fn ready(dir: &Path) -> Result<(), TestError> {
+        // let dir = env::current_dir().expect("error").join("test_files").join("test");
+
+        // if cfg!(test) {
+        //     println!("{:?}", &test_folder_path);
+        // }
+
+        if !&dir.exists() {
+            fs::create_dir(&dir).map_err(|_| TestError::FsErrorFailedCreate)?;
         }
 
-        match copy_dir(&base_path, &test_folder_path) {
-            Ok(_) => Ok(()),
-            Err(e) => {
-                eprintln!("{} -> {}", &test_folder_path.to_string_lossy(), e);
-                Err(e)
-            }
-        }
+        if let Err(e) = init_test_folder(dir) {
+            println!("error: {}\npath: {}", e.0, e.1);
+            return Err(e.0);
+        };
+        create_test_files(&dir)?;
+
+        Ok(())
     }
 
     #[test]
-    fn glo() {
-        if ready().is_err() {
-            return;
-        }
+    fn gloal() {
+        let mut test_folder_path = env::current_dir()
+            .expect("error")
+            .join("test_files")
+            .join("test");
 
-        let mut path = PathBuf::from("test_files/test");
-        let ok = create_folder(&PathBuf::from("test_files/test/renamed"));
-        println!("{:?}", ok);
-        match process_directory(&mut path) {
+        match ready(&test_folder_path) {
             Ok(_) => {}
             Err(e) => {
                 eprintln!("error: {}", e);
+                return;
             }
+        }
+
+        let true_file_list = vec!["two.wav", "three.wav", "one.wav"];
+        if let Err(e) = process_directory(&mut test_folder_path) {
+            eprintln!("error_: {}", e);
         };
+
+        let dir_list = test_folder_path.join("renamed").read_dir().unwrap();
+        let mut list: Vec<String> = Vec::new();
+        for file in dir_list {
+            list.push(file.unwrap().path().file_name().unwrap().to_string_lossy().to_string());
+        }
+        assert_eq!(list, true_file_list);
     }
 }
