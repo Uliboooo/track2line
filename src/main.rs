@@ -61,6 +61,14 @@ impl fmt::Display for ErrorCodeList {
     }
 }
 
+/// 指定したディレクトリ内のファイル一覧を取得する関数
+///
+/// # Arguments
+///
+/// * `dir_path` - 対象ディレクトリのパス
+///
+/// # Returns
+/// ファイルパスのベクター `Vec<PathBuf>`、またはエラー `ErrorCodeList`
 fn get_file_list(dir_path: &PathBuf) -> Result<Vec<PathBuf>, ErrorCodeList> {
     let file_list = fs::read_dir(dir_path).map_err(|_| ErrorCodeList::FailedGetPath)?;
     let mut file_vec: Vec<PathBuf> = Vec::new();
@@ -73,6 +81,14 @@ fn get_file_list(dir_path: &PathBuf) -> Result<Vec<PathBuf>, ErrorCodeList> {
     Ok(file_vec)
 }
 
+/// 指定した拡張子以外のファイルをリストから削除
+///
+/// # Arguments
+///
+/// * `list` - ファイルパスのリスト
+///
+/// # Returns
+/// ファイルパスのリスト (指定した拡張子のファイルのみ)
 fn remove_ignore_file(list: Vec<PathBuf>) -> Result<Vec<PathBuf>, ErrorCodeList> {
     let mut tmp_vec: Vec<PathBuf> = Vec::new();
     for path in list {
@@ -151,10 +167,6 @@ fn create_same_name_list(
                         txt_path: dir_path_2,
                     }
                 } else {
-                    // if cfg!(test) {
-                    //     println!("{:?}", dir_path_2);
-                    //     return Err(ErrorCodeList::NotFound);
-                    // }
                     continue; // セリフファイルが存在しない場合
                 }
             } else {
@@ -202,21 +214,9 @@ fn create_new_file_list(
     Ok(tmp)
 }
 
-fn process_directory(dir_path: &mut PathBuf) -> Result<String, ErrorCodeList> {
-    let list = remove_ignore_file(get_file_list(dir_path)?)?;
-    let new_folder_path = dir_path.clone().join("renamed");
-    create_folder(&new_folder_path)?;
-    let same_name_list = create_same_name_list(list, dir_path.to_path_buf())?;
-    let added_new_name_list = create_new_file_list(same_name_list, new_folder_path)?;
-    if show_confirm_list(&added_new_name_list)? {
-        rename(added_new_name_list)?;
-        Ok("success.".to_string())
-    } else {
-        println!("canceled.");
-        Err(ErrorCodeList::ChangeCancel)
-    }
-}
 
+
+/// パスのテキストファイルの内容を取得
 fn get_txt_content(file_path: &Path) -> Result<String, ErrorCodeList> {
     if cfg!(test) {
         eprintln!("get_txt_content: {:?}", file_path);
@@ -240,6 +240,7 @@ fn create_folder(input_path: &PathBuf) -> Result<(), ErrorCodeList> {
     }
 }
 
+/// pathをstringに
 fn path_to_string(path: &Path) -> Result<String, ErrorCodeList> {
     path.file_name()
         .and_then(|filename| filename.to_str())
@@ -247,6 +248,7 @@ fn path_to_string(path: &Path) -> Result<String, ErrorCodeList> {
         .ok_or(ErrorCodeList::FailedConvert)
 }
 
+/// 確認用にリスト表示
 fn show_confirm_list(list: &Vec<ChangedSetAudioTxt>) -> Result<bool, ErrorCodeList> {
     if cfg!(test) || cfg!(debug_assertions) {
         return Ok(true);
@@ -259,16 +261,31 @@ fn show_confirm_list(list: &Vec<ChangedSetAudioTxt>) -> Result<bool, ErrorCodeLi
             width = 20,
         );
     }
-    // print!("ok?(y/n)>");
-    // stdout().flush().unwrap();
     Ok(get_input("ok?(y/n)") != "n")
 }
 
+/// ファイル名を変更
 fn rename(list: Vec<ChangedSetAudioTxt>) -> Result<(), ErrorCodeList> {
     for file in list {
         fs::rename(file.base.audio_path, file.new).map_err(|_| ErrorCodeList::FailedRename)?;
     }
     Ok(())
+}
+
+/// 処理まとめ
+fn process_directory(dir_path: &mut PathBuf) -> Result<String, ErrorCodeList> {
+    let list = remove_ignore_file(get_file_list(dir_path)?)?;
+    let new_folder_path = dir_path.clone().join("renamed");
+    create_folder(&new_folder_path)?;
+    let same_name_list = create_same_name_list(list, dir_path.to_path_buf())?;
+    let added_new_name_list = create_new_file_list(same_name_list, new_folder_path)?;
+    if show_confirm_list(&added_new_name_list)? {
+        rename(added_new_name_list)?;
+        Ok("success.".to_string())
+    } else {
+        println!("canceled.");
+        Err(ErrorCodeList::ChangeCancel)
+    }
 }
 
 // 拡張子の設定
@@ -409,7 +426,6 @@ mod test_s {
 
     #[test]
     fn new_list() {
-        // let dir = PathBuf::from("test_files/test");
         let list = vec![
             PathBuf::from("test_files/test/foo.txt"),
             PathBuf::from("test_files/test/1.wav"),
@@ -484,21 +500,16 @@ mod test_s {
     // }
 
     fn ready(dir: &Path) -> Result<(), TestError> {
-        // let dir = env::current_dir().expect("error").join("test_files").join("test");
-
-        // if cfg!(test) {
-        //     println!("{:?}", &test_folder_path);
-        // }
 
         if !&dir.exists() {
-            fs::create_dir(&dir).map_err(|_| TestError::FsErrorFailedCreate)?;
+            fs::create_dir(dir).map_err(|_| TestError::FsErrorFailedCreate)?;
         }
 
         if let Err(e) = init_test_folder(dir) {
             println!("error: {}\npath: {}", e.0, e.1);
             return Err(e.0);
         };
-        create_test_files(&dir)?;
+        create_test_files(dir)?;
 
         Ok(())
     }
