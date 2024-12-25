@@ -214,8 +214,6 @@ fn create_new_file_list(
     Ok(tmp)
 }
 
-
-
 /// パスのテキストファイルの内容を取得
 fn get_txt_content(file_path: &Path) -> Result<String, ErrorCodeList> {
     if cfg!(test) {
@@ -409,6 +407,19 @@ mod test_s {
         }
     }
 
+    /// テスト用のフォルダを作成、初期化する関数
+    ///
+    /// # Arguments
+    ///
+    /// * `dir` - テストフォルダのパス
+    ///
+    /// # Returns
+    /// Result<(), (TestError, String)> - 成功した場合Ok(()), 失敗した場合Err((TestError, String))
+    /// テスト用のフォルダを作成、初期化する関数
+    ///
+    /// # Arguments
+    ///
+    /// * `dir` - テストフォルダのパス
     #[test]
     fn file_list_test() {
         let dir = PathBuf::from("test_files/test");
@@ -469,6 +480,14 @@ mod test_s {
         Ok(())
     }
 
+    /// テスト用のファイルを生成する関数
+    ///
+    /// # Arguments
+    ///
+    /// * `dir` - テストファイルを作成するディレクトリのパス
+    ///
+    /// # Returns
+    /// Result<(), TestError> - 成功した場合Ok(()), 失敗した場合Err(TestError)
     fn create_test_files(dir: &Path) -> Result<(), TestError> {
         let file_names = [
             (PathBuf::from("1.wav"), ""),
@@ -499,8 +518,12 @@ mod test_s {
     //     Ok(())
     // }
 
+    /// テスト環境の準備をする関数。テストフォルダを作成し、テストファイルを作成する。
+    ///
+    /// # Arguments
+    ///
+    /// * `dir` - テスト環境を作成するディレクトリのパス
     fn ready(dir: &Path) -> Result<(), TestError> {
-
         if !&dir.exists() {
             fs::create_dir(dir).map_err(|_| TestError::FsErrorFailedCreate)?;
         }
@@ -537,7 +560,14 @@ mod test_s {
         let dir_list = test_folder_path.join("renamed").read_dir().unwrap();
         let mut list: Vec<String> = Vec::new();
         for file in dir_list {
-            list.push(file.unwrap().path().file_name().unwrap().to_string_lossy().to_string());
+            list.push(
+                file.unwrap()
+                    .path()
+                    .file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .to_string(),
+            );
         }
         assert_eq!(list, true_file_list);
     }
