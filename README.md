@@ -9,7 +9,7 @@ voisona Talk等で、出力された音声ファイルの名前を同名のテ�
 
 上記の2点を確認の上使用してください。
 
-## 使い方
+## 使い方 概要
 
 音声ファイルの含まれたフォルダのパスを入力してください。実行すると、「renamed_files」というフォルダが作成され、変更済みの音声ファイルが移動されます。
 
@@ -25,6 +25,7 @@ sudo cp ./voicefile_name_changer /usr/local/bin/;
 echo "alias vfnc='/usr/local/bin/voicefile_name_changer'" >> ~/.zshrc;
 source ~/.zshrc;
 ```
+
 cp後のパスはダウンロードした実行ファイルのパスです。
 
 ### 使い方
@@ -35,7 +36,7 @@ vfnc /target_folder_path
 
 ### 実行ファイルをターゲットディレクトリに配置するとき
 
-```
+```bash
 // show file list
 $ ls
 1.txt   1.wav   2.txt   2.wav   3.txt   3.wav   voicefile_name_changer
@@ -54,7 +55,7 @@ $ ./voicefile_name_changer
 
 ### パスを引数に設定するとき
 
-```
+```bash
 $ ./voicefile_name_changer /target_folder_path
 1.wav                ---> first.wav
 3.wav                ---> three.wav
@@ -66,7 +67,7 @@ $ ./voicefile_name_changer /target_folder_path
 
 実行ファイルをターゲットディレクトリに配置するときは利用できません。
 
-```
+```bash
 $ ls
 1.rtf   1.mp3   2.rtf   2.mp3   3.rtf   3.mp3   voicefile_name_changer
 
