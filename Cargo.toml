@@ -1,5 +1,5 @@
 [package]
-name = "voicefile_name_changer"
+name = "track2line"
 version = "0.4.4"
 edition = "2021"
 
