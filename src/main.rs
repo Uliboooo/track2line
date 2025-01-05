@@ -538,7 +538,7 @@ mod test_s {
     }
 
     #[test]
-    fn gloal() {
+    fn global() {
         let mut test_folder_path = env::current_dir()
             .expect("error")
             .join("test_files")
