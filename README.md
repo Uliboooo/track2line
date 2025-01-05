@@ -1,4 +1,4 @@
-# voicefile_name_changer
+# track2line
 
 ## 用途
 
@@ -21,8 +21,8 @@ voisona Talk等で、出力された音声ファイルの名前を同名のテ�
 2. その実行ファイルのパスをaliasに設定
 
 ```zsh: install
-sudo cp ./voicefile_name_changer /usr/local/bin/;
-echo "alias vfnc='/usr/local/bin/voicefile_name_changer'" >> ~/.zshrc;
+sudo cp ./track2line /usr/local/bin/;
+echo "alias vfnc='/usr/local/bin/track2line'" >> ~/.zshrc;
 source ~/.zshrc;
 ```
 
@@ -39,14 +39,14 @@ vfnc /target_folder_path
 ```bash
 // show file list
 $ ls
-1.txt   1.wav   2.txt   2.wav   3.txt   3.wav   voicefile_name_changer
+1.txt   1.wav   2.txt   2.wav   3.txt   3.wav   track2line
 
 $ cat 1.txt 2.txt 3.txt 
 first
 second
 three
 
-$ ./voicefile_name_changer
+$ ./track2line
 1.wav                ---> first.wav
 3.wav                ---> three.wav
 2.wav                ---> second.wav
@@ -56,7 +56,7 @@ $ ./voicefile_name_changer
 ### パスを引数に設定するとき
 
 ```bash
-$ ./voicefile_name_changer /target_folder_path
+$ ./track2line /target_folder_path
 1.wav                ---> first.wav
 3.wav                ---> three.wav
 2.wav                ---> second.wav
@@ -69,9 +69,9 @@ $ ./voicefile_name_changer /target_folder_path
 
 ```bash
 $ ls
-1.rtf   1.mp3   2.rtf   2.mp3   3.rtf   3.mp3   voicefile_name_changer
+1.rtf   1.mp3   2.rtf   2.mp3   3.rtf   3.mp3   track2line
 
-$ ./voicefile_name_changer -a mp3 -t rtf /target_folder_path
+$ ./track2line -a mp3 -t rtf /target_folder_path
 1.mp3                ---> one.mp3
 2.mp3                ---> two.mp3
 3.mp3                ---> three.mp3
