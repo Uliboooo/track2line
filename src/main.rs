@@ -398,7 +398,7 @@ mod test_s {
     impl fmt::Display for TestError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match self {
-                TestError::FailedGetFileList => write!(f, "failed get dile list"),
+                TestError::FailedGetFileList => write!(f, "failed get file list"),
                 TestError::FailedGetFile => write!(f, "failed get file"),
                 // TestError::FailedCopy => write!(f, "failed copy"),
                 TestError::FsErrorFailedCreate => write!(f, "failed create"),
