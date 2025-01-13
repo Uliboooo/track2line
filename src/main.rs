@@ -334,7 +334,6 @@ static TXT_EXTENSION: OnceLock<String> = OnceLock::new();
 /// 3.mp3                ---> three.mp3
 /// 本当に変更しますか?(y/n)>n
 /// ```
-///
 fn main() {
     let args = Args::parse();
 
