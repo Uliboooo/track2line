@@ -1,6 +1,6 @@
 # Track2line cli
 
-https://github.com/Uliboooo/track2line_lib
+core functionality is composed of https://github.com/Uliboooo/track2line_lib.
 
 ## what's tool
 
@@ -22,7 +22,7 @@ voisona talkなどで提供されている音声ファイル名を、同名の�
 
 ## usage
 
-```bash: basic
+```bash
 # --help
 Usage: track2line_cli [OPTIONS] <FOLDER_PATH>
 
@@ -38,7 +38,7 @@ Options:
 
 ## install
 
-add to the PATH of dir that include executable file (`t2l`).
+add to the PATH of dir that include executable file (`track2line`).
 
 ```zsh
 echo executable_file_path >> ~/.zshrc
