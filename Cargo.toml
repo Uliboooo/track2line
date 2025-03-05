@@ -1,10 +1,12 @@
 [package]
-name = "track2line"
-version = "0.5.0"
-edition = "2021"
+name = "track2line_cli"
+version = "0.6.0"
+edition = "2024"
 
 [dependencies]
-get_input = { git = "https://github.com/Uliboooo/get_input" }
-clap = { version = "4.5.26", features = ["derive"] }
-# colored = "1.*"
-# tempfile = "3.14.*"
+track2line_lib = { git = "https://github.com/Uliboooo/track2line_lib", tag = "0.2.0" }
+clap = { version = "4.5.31", features = ["derive"] }
+serde = { version = "1.0.218", features = ["derive"] }
+toml = "0.8.20"
+get_input = { git = "https://github.com/Uliboooo/get_input", tag = "0.5.0" }
+home = "0.5.11"
