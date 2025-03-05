@@ -250,8 +250,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "track2line_cli"
-version = "0.6.0"
+name = "track2line"
+version = "0.6.1"
 dependencies = [
  "clap",
  "get_input",
