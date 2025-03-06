@@ -42,8 +42,17 @@ impl fmt::Display for Error {
 }
 
 #[derive(Parser, Debug)]
+#[command(verbatim_doc_comment)]
 struct Args {
-    /// target folder path
+    #[arg(
+        short = 's',
+        long = "set_mode",
+        help = "set audio extension\n`track2line -s -a mp3(optional) -t rtf(optional)`",
+        default_value_t = false
+    )]
+    set_mode: bool,
+    
+    /// a path of target folder
     folder_path: Option<String>,
 
     /// change audio extension
@@ -53,14 +62,6 @@ struct Args {
     /// change text(lines) extension
     #[arg(short = 't', long = "text", help = "change text file extension")]
     txt_extension: Option<String>,
-
-    #[arg(
-        short = 's',
-        long = "set_audio",
-        help = "set audio extension",
-        default_value_t = false
-    )]
-    set_mode: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
