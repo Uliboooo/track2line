@@ -51,7 +51,7 @@ struct Args {
         default_value_t = false
     )]
     set_mode: bool,
-    
+
     /// a path of target folder
     folder_path: Option<String>,
 
@@ -118,7 +118,7 @@ impl Config {
 fn main() -> Result<(), Error> {
     // init config
     Config::default().init()?;
-    
+
     let args = Args::parse();
     let config = Config::load()?;
 
@@ -166,7 +166,7 @@ mod tests {
         );
         println!("{:?}", a);
     }
-    
+
     #[test]
     fn test_config_init() {
         Config::default().init().unwrap();

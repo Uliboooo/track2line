@@ -7,8 +7,7 @@ use std::{
 
 /// get the path to the config file
 fn get_config_path() -> Result<PathBuf, Error> {
-    let home_path = home::home_dir()
-        .ok_or(Error::SomeErr)?;
+    let home_path = home::home_dir().ok_or(Error::SomeErr)?;
     let tmp_path = if cfg!(target_os = "windows") {
         home_path.join("AppData").join("Local").join("track2line")
     } else if cfg!(target_os = "macos") {

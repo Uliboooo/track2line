@@ -14,8 +14,8 @@ project_name="track2line"
 #build
 cargo fmt
 
-brew update
-brew upgrade
+# brew update
+# brew upgrade
 
 cargo build --release
 cargo build --release --target x86_64-unknown-linux-gnu
