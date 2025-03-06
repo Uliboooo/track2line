@@ -8,10 +8,8 @@ use std::{
 /// get the path to the config file
 fn get_config_path() -> Result<PathBuf, Error> {
     let home_path = home::home_dir()
-        .ok_or(Error::SomeErr)?
-        .join(".track2line_config")
-        .join("config.toml");
-    Ok(if cfg!(target_os = "windows") {
+        .ok_or(Error::SomeErr)?;
+    let tmp_path = if cfg!(target_os = "windows") {
         home_path.join("AppData").join("Local").join("track2line")
     } else if cfg!(target_os = "macos") {
         home_path
@@ -21,8 +19,11 @@ fn get_config_path() -> Result<PathBuf, Error> {
     } else {
         // linux
         home_path.join(".config").join("track2line")
+    };
+    if !tmp_path.exists() {
+        fs::create_dir(&tmp_path).map_err(Error::IoErr)?;
     }
-    .join("config.toml"))
+    Ok(tmp_path.join("config.toml"))
 }
 
 /// overwrite existing file
@@ -37,7 +38,8 @@ pub fn save(content: String, overwrite: bool) -> Result<(), Error> {
     } else {
         OpenOptions::new()
             .write(true)
-            .create_new(true)
+            .create(true)
+            .truncate(false)
             .open(get_config_path()?)
             .map_err(Error::IoErr)?
     };
@@ -52,4 +54,17 @@ pub fn load_config() -> Result<String, Error> {
     } else {
         Err(Error::ConfigNotFound)
     }
+}
+
+#[test]
+fn show_config_path() {
+    println!("{:?}", get_config_path());
+    let b = OpenOptions::new()
+        .write(true)
+        .truncate(false)
+        .create(true)
+        .open(get_config_path().unwrap())
+        .map_err(Error::IoErr)
+        .unwrap();
+    println!("{:?}", b);
 }

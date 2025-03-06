@@ -85,7 +85,7 @@ impl Config {
     //     }
     // }
 
-    /// if config file exists, load it, otherwise create a new one by default(wav, txt)
+    /// if config file exists, load it, otherwise return default(wav, txt)
     fn load() -> Result<Self, Error> {
         match fs_ctrl::load_config() {
             Ok(v) => Ok(toml::from_str(v.as_str()).map_err(|_| Error::SomeErr)?),
@@ -115,14 +115,15 @@ impl Config {
 }
 
 fn main() -> Result<(), Error> {
+    // init config
+    Config::default().init()?;
+    
     let args = Args::parse();
     let config = Config::load()?;
 
-    // init config
-    Config::default().init()?;
-
     if args.set_mode {
         // set mode
+        // .change() return Result<(), Error>
         return config.change(args.audio_extension, args.txt_extension);
     } else {
         // normal mode
@@ -163,5 +164,10 @@ mod tests {
             "txt",
         );
         println!("{:?}", a);
+    }
+    
+    #[test]
+    fn test_config_init() {
+        Config::default().init().unwrap();
     }
 }
