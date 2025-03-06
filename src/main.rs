@@ -87,7 +87,7 @@ impl Config {
 
     /// if config file exists, load it, otherwise create a new one by default(wav, txt)
     fn load() -> Result<Self, Error> {
-        match fs_ctrl::load() {
+        match fs_ctrl::load_config() {
             Ok(v) => Ok(toml::from_str(v.as_str()).map_err(|_| Error::SomeErr)?),
             Err(e) => match e {
                 Error::ConfigNotFound => Ok(Config::default()),
@@ -104,12 +104,12 @@ impl Config {
         } else if let Some(t) = text {
             new_config.txt_extension = t.as_ref().to_string()
         }
-        fs_ctrl::save(toml::to_string(&new_config).map_err(|_| Error::Toml)?)?;
+        fs_ctrl::save(toml::to_string(&new_config).map_err(|_| Error::Toml)?, true)?;
         Ok(())
     }
 
-    fn save(&self) -> Result<(), Error> {
-        fs_ctrl::save(toml::to_string(&self).map_err(|_| Error::Toml)?)?;
+    fn init(&self) -> Result<(), Error> {
+        fs_ctrl::save(toml::to_string(&self).map_err(|_| Error::Toml)?, false)?;
         Ok(())
     }
 }
@@ -119,9 +119,10 @@ fn main() -> Result<(), Error> {
     let config = Config::load()?;
 
     // init config
-    Config::default().save()?;
+    Config::default().init()?;
 
     if args.set_mode {
+        // set mode
         return config.change(args.audio_extension, args.txt_extension);
     } else {
         // normal mode
