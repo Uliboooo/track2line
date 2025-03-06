@@ -154,4 +154,14 @@ mod tests {
         let con = Config::load();
         println!("{:?}", con);
     }
+
+    #[test]
+    fn a() {
+        let a = track2line_lib::PathSets::new(
+            "/Users/yuki/Develop/track2line/assets_for_test/assets",
+            "wav",
+            "txt",
+        );
+        println!("{:?}", a);
+    }
 }
