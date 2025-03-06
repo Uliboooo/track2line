@@ -23,23 +23,25 @@ voisona talkなどで提供される音声ファイル名を、同名のテキ�
 ## usage
 
 ```bash
-# track2line --help
-Usage: track2line_cli [OPTIONS] <FOLDER_PATH>
-
+# track2line -h
 Arguments:
-  <FOLDER_PATH>  target folder path
+  [FOLDER_PATH]  a path of target folder
 
 Options:
+  -s, --set_mode                 set audio extension
+                                 `track2line -s -a mp3(optional) -t rtf(optional)`
   -a, --audio <AUDIO_EXTENSION>  change audio file extension
   -t, --text <TXT_EXTENSION>     change text file extension
-  -s, --set_audio                set audio extension
   -h, --help                     Print help
 ```
 
 ### when use `mp3` as audio file and `rtf` as lines file.
 
 ```bash
+# when using mp3 and rtf
 track2line -a mp3 -t rtf <FOLDER_PATH>
+# or (only one of them can be used.)
+track2line -a mp3
 ```
 
 ### how to persist settings
@@ -49,6 +51,8 @@ track2line -a mp3 -t rtf <FOLDER_PATH>
 track2line --set_audio -a mp3
 # set rtf as text extension
 track2line --set_text -t rtf
+# set both
+track2line -s -a mp3 -t rtf
 ```
 
 ## install
@@ -70,10 +74,6 @@ and remove config file 👇.
   - `~/Library/Application Support/track2line/config.toml`
 - linux
   - `~/.config/track2line/config.toml`
-
-```zsh
-sed -i '/executable_file_path/d' ~/.zshrc
-```
 
 ## Disclaimer
 
