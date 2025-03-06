@@ -36,6 +36,12 @@ Options:
   -h, --help                     Print help
 ```
 
+### when use `mp3` as audio file and `rtf` as lines file.
+
+```bash
+track2line -a mp3 -t rtf <FOLDER_PATH>
+```
+
 ## install
 
 add to the PATH of dir that include executable file (`track2line`).

@@ -76,12 +76,12 @@ impl Default for Config {
     }
 }
 impl Config {
-    fn new<S: AsRef<str>>(audio: S, txt: S) -> Self {
-        Config {
-            audio_extension: audio.as_ref().to_string(),
-            txt_extension: txt.as_ref().to_string(),
-        }
-    }
+    // fn new<S: AsRef<str>>(audio: S, txt: S) -> Self {
+    //     Config {
+    //         audio_extension: audio.as_ref().to_string(),
+    //         txt_extension: txt.as_ref().to_string(),
+    //     }
+    // }
 
     /// if config file exists, load it, otherwise create a new one by default(wav, txt)
     fn load() -> Result<Self, Error> {
