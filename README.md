@@ -4,7 +4,7 @@ core functionality is composed of https://github.com/Uliboooo/track2line_lib.
 
 ## what's tool
 
-this is tool that converts name of audio file provid by voisona talk, etc. by referring to a text file of the same name.
+this is tool that converts name of audio file provide by voisona talk, etc. by referring to a text file of the same name.
 
 therefore, please check there points.
 
