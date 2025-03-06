@@ -4,7 +4,7 @@ core functionality is composed of https://github.com/Uliboooo/track2line_lib.
 
 ## what's tool
 
-this is tool that converts name of audio file provided by voisona talk, etc. by referring to a text file of the same name.
+this is tool that converts name of audio file provid by voisona talk, etc. by referring to a text file of the same name.
 
 therefore, please check there points.
 
@@ -13,7 +13,7 @@ therefore, please check there points.
 
 ---
 
-voisona talkなどで提供されている音声ファイル名を、同名のテキストファイルを参照して変換するツールです。
+voisona talkなどで提供される音声ファイル名を、同名のテキストファイルを参照して変換するツールです。
 
 そのため、以下の点をご確認ください。
 
@@ -23,7 +23,7 @@ voisona talkなどで提供されている音声ファイル名を、同名の�
 ## usage
 
 ```bash
-# --help
+# track2line --help
 Usage: track2line_cli [OPTIONS] <FOLDER_PATH>
 
 Arguments:
@@ -42,12 +42,37 @@ Options:
 track2line -a mp3 -t rtf <FOLDER_PATH>
 ```
 
+### how to persist settings
+
+```bash
+# set mp3 as audio extension
+track2line --set_audio -a mp3
+# set rtf as text extension
+track2line --set_text -t rtf
+```
+
 ## install
 
 add to the PATH of dir that include executable file (`track2line`).
 
 ```zsh
 echo executable_file_path >> ~/.zshrc
+```
+
+## uninstall
+
+remove from the PATH of dir that include executable file (`track2line`).
+and remove config file 👇.
+
+- windows
+  - `%USERPROFILE%\AppData\Local\track2line\config.toml`
+- macos
+  - `~/Library/Application Support/track2line/config.toml`
+- linux
+  - `~/.config/track2line/config.toml`
+
+```zsh
+sed -i '/executable_file_path/d' ~/.zshrc
 ```
 
 ## Disclaimer
