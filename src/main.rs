@@ -7,6 +7,7 @@ use track2line_lib as t2l;
 
 #[derive(Debug)]
 enum Error {
+    NoInput,
     IoErr(io::Error),
     Toml,
     SomeErr,
@@ -30,6 +31,7 @@ impl error::Error for Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Error::NoInput => writeln!(f, "no input, pelse folder path."),
             Error::IoErr(error) => writeln!(f, "{}", error),
             Error::Toml => writeln!(f, "toml error"),
             Error::SomeErr => writeln!(f, "something error"),
@@ -42,7 +44,7 @@ impl fmt::Display for Error {
 #[derive(Parser, Debug)]
 struct Args {
     /// target folder path
-    folder_path: String,
+    folder_path: Option<String>,
 
     /// change audio extension
     #[arg(short = 'a', long = "audio", help = "change audio file extension")]
@@ -115,7 +117,7 @@ fn main() -> Result<(), Error> {
         return config.save(args.audio_extension, args.txt_extension);
     } else {
         // normal mode
-        let dir = args.folder_path;
+        let dir = args.folder_path.ok_or(Error::NoInput)?;
         let audio_ext = args.audio_extension.unwrap_or(config.audio_extension);
         let line_ext = args.txt_extension.unwrap_or(config.txt_extension);
 
