@@ -97,7 +97,7 @@ impl Config {
     }
 
     /// save config to file. when args are some(), save them to config.
-    fn save<S: AsRef<str>>(&self, audio: Option<S>, text: Option<S>) -> Result<(), Error> {
+    fn change<S: AsRef<str>>(&self, audio: Option<S>, text: Option<S>) -> Result<(), Error> {
         let mut new_config = Config::load()?;
         if let Some(a) = audio {
             new_config.audio_extension = a.as_ref().to_string()
@@ -107,14 +107,22 @@ impl Config {
         fs_ctrl::save(toml::to_string(&new_config).map_err(|_| Error::Toml)?)?;
         Ok(())
     }
+
+    fn save(&self) -> Result<(), Error> {
+        fs_ctrl::save(toml::to_string(&self).map_err(|_| Error::Toml)?)?;
+        Ok(())
+    }
 }
 
 fn main() -> Result<(), Error> {
     let args = Args::parse();
     let config = Config::load()?;
 
+    // init config
+    Config::default().save()?;
+
     if args.set_mode {
-        return config.save(args.audio_extension, args.txt_extension);
+        return config.change(args.audio_extension, args.txt_extension);
     } else {
         // normal mode
         let dir = args.folder_path.ok_or(Error::NoInput)?;
