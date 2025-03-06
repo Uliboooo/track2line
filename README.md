@@ -20,7 +20,25 @@ voisona talkなどで提供される音声ファイル名を、同名のテキ�
 - 音声ファイル名とテキストファイル名が一致していること。
 - テキストファイルに行が含まれていること(行が空の場合は音声ファイル名に「_」を挿入)
 
-## usage
+## usage as a tool
+
+double click on `track2line.exe` or `track2line` file. then, input the path of target folder.
+
+```bash
+# open cli tool by double click on `track2line.exe` or `track2line` file.
+target folder>assets_for_test/assets # 👈input the path of target folder
+* Talk1_2.wav          ---> まずはジェネリック型。.wav
+* Talk1_3.wav          ---> ジェネリック型、もしくはジェネリクスとは.wav
+* include_whs_end .wav ---> include_whs_end.wav
+* Talk1_1.wav          ---> 100秒で分かるジェネリック型とトレイト.wav
+* Talk1_4.wav          ---> 以下のようにとても似ているが引数の型だけ.wav
+* non_line.wav         ---> _.wav
+
+continue?(y(yes or enter)/n)y        # if you ok, input y or enter, if you want to cancel, input n.
+success. all file is renamed.
+```
+
+## usage as a cli
 
 ```bash
 # track2line -h

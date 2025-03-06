@@ -1,6 +1,7 @@
 mod fs_ctrl;
 
 use clap::Parser;
+use get_input::get_input;
 use serde::{Deserialize, Serialize};
 use std::{error, fmt, io};
 use track2line_lib as t2l;
@@ -13,6 +14,7 @@ enum Error {
     SomeErr,
     Cancel,
     ConfigNotFound,
+    T2L(t2l::Error),
 }
 // いつかちゃんと実装する
 impl error::Error for Error {
@@ -37,6 +39,7 @@ impl fmt::Display for Error {
             Error::SomeErr => writeln!(f, "something error"),
             Error::Cancel => writeln!(f, "canceled."),
             Error::ConfigNotFound => writeln!(f, "config file not found."),
+            Error::T2L(error) => writeln!(f, "{}", error),
         }
     }
 }
@@ -115,6 +118,15 @@ impl Config {
     }
 }
 
+fn get_user_input() -> Result<String, Error> {
+    let input = get_input("target folder>");
+    if input.is_empty() {
+        Err(Error::NoInput)
+    } else {
+        Ok(input)
+    }
+}
+
 fn main() -> Result<(), Error> {
     // init config
     Config::default().init()?;
@@ -128,11 +140,11 @@ fn main() -> Result<(), Error> {
         return config.change(args.audio_extension, args.txt_extension);
     } else {
         // normal mode
-        let dir = args.folder_path.ok_or(Error::NoInput)?;
+        let dir = args.folder_path.unwrap_or(get_user_input()?);
         let audio_ext = args.audio_extension.unwrap_or(config.audio_extension);
         let line_ext = args.txt_extension.unwrap_or(config.txt_extension);
 
-        let mut sets = t2l::PathSets::new(&dir, audio_ext, line_ext).unwrap();
+        let mut sets = t2l::PathSets::new(&dir, audio_ext, line_ext).map_err(Error::T2L)?;
         let check_list = sets.check().map_err(|_| Error::SomeErr)?;
         println!("{}", check_list);
 

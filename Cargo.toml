@@ -1,11 +1,11 @@
 [package]
 name = "track2line"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2024"
 
 [dependencies]
-track2line_lib = { git = "https://github.com/Uliboooo/track2line_lib", tag = "0.2.1" }
-get_input = { git = "https://github.com/Uliboooo/get_input", tag = "0.5.0" }
+track2line_lib = { git = "https://github.com/Uliboooo/track2line_lib", tag = "0.3.0" }
+get_input = { git = "https://github.com/Uliboooo/get_input", tag = "0.5.1" }
 clap = { version = "4.5.31", features = ["derive"] }
 serde = { version = "1.0.218", features = ["derive"] }
 toml = "0.8.20"

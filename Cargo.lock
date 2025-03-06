@@ -105,8 +105,8 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "get_input"
-version = "0.5.0"
-source = "git+https://github.com/Uliboooo/get_input?tag=0.5.0#a6a95d373a647fffaeccd622c3e312fa89f24812"
+version = "0.5.1"
+source = "git+https://github.com/Uliboooo/get_input?tag=0.5.1#868dc7a0ba5ebe77b8458013c5d63c51d686ef9a"
 
 [[package]]
 name = "hashbrown"
@@ -251,7 +251,7 @@ dependencies = [
 
 [[package]]
 name = "track2line"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "clap",
  "get_input",
@@ -263,8 +263,8 @@ dependencies = [
 
 [[package]]
 name = "track2line_lib"
-version = "0.2.1"
-source = "git+https://github.com/Uliboooo/track2line_lib?tag=0.2.1#ce0b16c895caa28ce866d1eb48d06c4bcbf0582f"
+version = "0.3.0"
+source = "git+https://github.com/Uliboooo/track2line_lib?tag=0.3.0#571edc3e11ecf19830c43949e7684f93af0b534c"
 
 [[package]]
 name = "unicode-ident"
