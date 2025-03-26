@@ -41,6 +41,8 @@ success. all file is renamed.
 
 ## usage as a cli
 
+by using `-y`, you can avoid interactive inputs."
+
 ```bash
 # track2line -h
 Usage: track2line [OPTIONS] [FOLDER_PATH]
@@ -53,6 +55,7 @@ Options:
                                  `track2line -s -a mp3(optional) -t rtf(optional)`
   -a, --audio <AUDIO_EXTENSION>  change audio file extension. if use set-mode(-s), change config.
   -r, --reset                    reset config. need -s.
+  -y, --yes                      don't request all interactive input
   -t, --text <TXT_EXTENSION>     change text file extension.  if use set-mode(-s), change config.
   -h, --help                     Print help
 ```

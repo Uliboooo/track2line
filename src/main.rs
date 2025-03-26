@@ -63,6 +63,14 @@ struct Args {
     #[arg(short = 'r', long = "reset", help = "reset config. need -s.")]
     reset: bool,
 
+    /// don't request all interactive input
+    #[arg(
+        short = 'y',
+        long = "yes",
+        help = "don't request all interactive input"
+    )]
+    yes: bool,
+
     /// change text(lines) extension
     #[arg(
         short = 't',
@@ -109,7 +117,8 @@ fn main() -> Result<(), Error> {
             );
         }
         if args.reset
-            && yes_no("the configuration of track2line will be reset. continue? (y(enter)/n)")
+            && (args.yes
+                || yes_no("the configuration of track2line will be reset. continue? (y(enter)/n)"))
         {
             let default_config = t2l::config::Config::default();
             println!(
@@ -135,7 +144,7 @@ fn main() -> Result<(), Error> {
         let check_list = sets.check().map_err(|_| Error::SomeErr)?;
         println!("{}", check_list);
 
-        if get_input::yes_no("continue?(y(enter)/n)") {
+        if args.yes || get_input::yes_no("continue?(y(enter)/n)") {
             sets.rename().map_err(|_| Error::SomeErr)?;
             // 👆で?しているので、成功したことを確認するためのメッセージを表示する
             println!("success. all file is renamed.");
