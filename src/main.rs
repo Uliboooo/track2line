@@ -1,20 +1,18 @@
-mod fs_ctrl;
+// mod fs_ctrl;
 
 use clap::Parser;
 use get_input::get_input;
-use serde::{Deserialize, Serialize};
-use std::{error, fmt, io};
-use track2line_lib as t2l;
+use std::{error, fmt, path::PathBuf};
+use track2line_lib::{self as t2l};
 
 #[derive(Debug)]
 enum Error {
     NoInput,
-    IoErr(io::Error),
-    Toml,
+    // IoErr(io::Error),
     SomeErr,
     Cancel,
-    ConfigNotFound,
     T2L(t2l::Error),
+    Config(t2l::config::Error),
 }
 // いつかちゃんと実装する
 impl error::Error for Error {
@@ -34,12 +32,11 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::NoInput => writeln!(f, "no input, pelse folder path."),
-            Error::IoErr(error) => writeln!(f, "{}", error),
-            Error::Toml => writeln!(f, "toml error"),
+            // Error::IoErr(error) => writeln!(f, "{}", error),
             Error::SomeErr => writeln!(f, "something error"),
             Error::Cancel => writeln!(f, "canceled."),
-            Error::ConfigNotFound => writeln!(f, "config file not found."),
             Error::T2L(error) => writeln!(f, "{}", error),
+            Error::Config(error) => writeln!(f, "{}", error),
         }
     }
 }
@@ -59,63 +56,20 @@ struct Args {
     folder_path: Option<String>,
 
     /// change audio extension
-    #[arg(short = 'a', long = "audio", help = "change audio file extension")]
+    #[arg(
+        short = 'a',
+        long = "audio",
+        help = "change audio file extension. if use set-mode(-s), change config."
+    )]
     audio_extension: Option<String>,
 
     /// change text(lines) extension
-    #[arg(short = 't', long = "text", help = "change text file extension")]
+    #[arg(
+        short = 't',
+        long = "text",
+        help = "change text file extension.  if use set-mode(-s), change config."
+    )]
     txt_extension: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Config {
-    // extensions configs
-    audio_extension: String,
-    txt_extension: String,
-}
-impl Default for Config {
-    fn default() -> Self {
-        Config {
-            audio_extension: "wav".to_string(),
-            txt_extension: "txt".to_string(),
-        }
-    }
-}
-impl Config {
-    // fn new<S: AsRef<str>>(audio: S, txt: S) -> Self {
-    //     Config {
-    //         audio_extension: audio.as_ref().to_string(),
-    //         txt_extension: txt.as_ref().to_string(),
-    //     }
-    // }
-
-    /// if config file exists, load it, otherwise return default(wav, txt)
-    fn load() -> Result<Self, Error> {
-        match fs_ctrl::load_config() {
-            Ok(v) => Ok(toml::from_str(v.as_str()).map_err(|_| Error::SomeErr)?),
-            Err(e) => match e {
-                Error::ConfigNotFound => Ok(Config::default()),
-                _ => Err(e),
-            },
-        }
-    }
-
-    /// save config to file. when args are some(), save them to config.
-    fn change<S: AsRef<str>>(&self, audio: Option<S>, text: Option<S>) -> Result<(), Error> {
-        let mut new_config = Config::load()?;
-        if let Some(a) = audio {
-            new_config.audio_extension = a.as_ref().to_string()
-        } else if let Some(t) = text {
-            new_config.txt_extension = t.as_ref().to_string()
-        }
-        fs_ctrl::save(toml::to_string(&new_config).map_err(|_| Error::Toml)?, true)?;
-        Ok(())
-    }
-
-    fn init(&self) -> Result<(), Error> {
-        fs_ctrl::save(toml::to_string(&self).map_err(|_| Error::Toml)?, false)?;
-        Ok(())
-    }
 }
 
 fn get_user_input() -> Result<String, Error> {
@@ -128,19 +82,40 @@ fn get_user_input() -> Result<String, Error> {
 }
 
 fn main() -> Result<(), Error> {
-    // init config
-    Config::default().init()?;
+    let mut config = t2l::config::Config::load().map_err(Error::Config)?;
 
     let args = Args::parse();
-    let config = Config::load()?;
 
     if args.set_mode {
         // set mode
-        // .change() return Result<(), Error>
-        return config.change(args.audio_extension, args.txt_extension);
+        if let Some(v) = args.audio_extension {
+            config.set_audio_ext(v.as_str());
+            println!(
+                "{}",
+                match config.save() {
+                    Ok(_) => format!("success. config changed to {}", v),
+                    Err(e) => format!("failed... error: {}", e),
+                }
+            );
+        }
+        if let Some(v) = args.txt_extension {
+            config.set_txt_ext(v.as_str());
+            println!(
+                "{}",
+                match config.save() {
+                    Ok(_) => format!("success. config changed to {}", v),
+                    Err(e) => format!("failed... error: {}", e),
+                }
+            );
+        }
     } else {
         // normal mode
-        let dir = args.folder_path.unwrap_or(get_user_input()?);
+        //なぜかunwrap_or()にすると常にnone判定?
+        let dir = PathBuf::from(match args.folder_path {
+            Some(v) => v,
+            None => get_user_input()?,
+        });
+
         let audio_ext = args.audio_extension.unwrap_or(config.audio_extension);
         let line_ext = args.txt_extension.unwrap_or(config.txt_extension);
 
@@ -148,11 +123,12 @@ fn main() -> Result<(), Error> {
         let check_list = sets.check().map_err(|_| Error::SomeErr)?;
         println!("{}", check_list);
 
-        if get_input::yes_no("continue?(y(yes or enter)/n)") {
+        if get_input::yes_no("continue?(y(or enter)/n)") {
             sets.rename().map_err(|_| Error::SomeErr)?;
             // 👆で?しているので、成功したことを確認するためのメッセージを表示する
             println!("success. all file is renamed.");
         } else {
+            println!("ok, cancelled. your files has not changed.");
             return Err(Error::Cancel);
         }
     }
@@ -161,7 +137,7 @@ fn main() -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
+    use track2line_lib::config::Config;
 
     #[test]
     fn config() {
@@ -177,10 +153,5 @@ mod tests {
             "txt",
         );
         println!("{:?}", a);
-    }
-
-    #[test]
-    fn test_config_init() {
-        Config::default().init().unwrap();
     }
 }

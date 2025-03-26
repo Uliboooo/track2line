@@ -1,10 +1,11 @@
 [package]
 name = "track2line"
-version = "0.9.0"
+version = "0.9.1"
 edition = "2024"
 
 [dependencies]
-track2line_lib = { git = "https://github.com/Uliboooo/track2line_lib", tag = "0.3.0" }
+track2line_lib = { git = "https://github.com/Uliboooo/track2line_lib", tag = "v0.9.2", features = ["config"]}
+# track2line_lib = { path = "/Users/yuki/Develop/track2line_lib", features = ["config"]}
 get_input = { git = "https://github.com/Uliboooo/get_input", tag = "0.5.1" }
 clap = { version = "4.5.31", features = ["derive"] }
 serde = { version = "1.0.218", features = ["derive"] }
