@@ -1,14 +1,11 @@
-// mod fs_ctrl;
-
 use clap::Parser;
-use get_input::get_input;
+use get_input::{get_input, yes_no};
 use std::{error, fmt, path::PathBuf};
 use track2line_lib::{self as t2l};
 
 #[derive(Debug)]
 enum Error {
     NoInput,
-    // IoErr(io::Error),
     SomeErr,
     Cancel,
     T2L(t2l::Error),
@@ -32,7 +29,6 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::NoInput => writeln!(f, "no input, pelse folder path."),
-            // Error::IoErr(error) => writeln!(f, "{}", error),
             Error::SomeErr => writeln!(f, "something error"),
             Error::Cancel => writeln!(f, "canceled."),
             Error::T2L(error) => writeln!(f, "{}", error),
@@ -62,6 +58,10 @@ struct Args {
         help = "change audio file extension. if use set-mode(-s), change config."
     )]
     audio_extension: Option<String>,
+
+    /// reset config
+    #[arg(short = 'r', long = "reset", help = "reset config. need -s.")]
+    reset: bool,
 
     /// change text(lines) extension
     #[arg(
@@ -108,6 +108,18 @@ fn main() -> Result<(), Error> {
                 }
             );
         }
+        if args.reset
+            && yes_no("the configuration of track2line will be reset. continue? (y(enter)/n)")
+        {
+            let default_config = t2l::config::Config::default();
+            println!(
+                "{}",
+                match default_config.save() {
+                    Ok(_) => "success. the configuration is reset.".to_string(),
+                    Err(e) => format!("failed... error: {}", e),
+                }
+            );
+        }
     } else {
         // normal mode
         //なぜかunwrap_or()にすると常にnone判定?
@@ -123,7 +135,7 @@ fn main() -> Result<(), Error> {
         let check_list = sets.check().map_err(|_| Error::SomeErr)?;
         println!("{}", check_list);
 
-        if get_input::yes_no("continue?(y(or enter)/n)") {
+        if get_input::yes_no("continue?(y(enter)/n)") {
             sets.rename().map_err(|_| Error::SomeErr)?;
             // 👆で?しているので、成功したことを確認するためのメッセージを表示する
             println!("success. all file is renamed.");

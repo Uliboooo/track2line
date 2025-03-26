@@ -1,6 +1,7 @@
 # Track2line cli
 
-core functionality is composed of https://github.com/Uliboooo/track2line_lib.
+- core functionality is composed of https://github.com/Uliboooo/track2line_lib.
+- gui ver. https://github.com/Uliboooo/track2line_gui
 
 ## what's tool
 
@@ -42,35 +43,63 @@ success. all file is renamed.
 
 ```bash
 # track2line -h
+Usage: track2line [OPTIONS] [FOLDER_PATH]
+
 Arguments:
   [FOLDER_PATH]  a path of target folder
 
 Options:
   -s, --set_mode                 set audio extension
                                  `track2line -s -a mp3(optional) -t rtf(optional)`
-  -a, --audio <AUDIO_EXTENSION>  change audio file extension
-  -t, --text <TXT_EXTENSION>     change text file extension
+  -a, --audio <AUDIO_EXTENSION>  change audio file extension. if use set-mode(-s), change config.
+  -r, --reset                    reset config. need -s.
+  -t, --text <TXT_EXTENSION>     change text file extension.  if use set-mode(-s), change config.
   -h, --help                     Print help
 ```
 
-### when use `mp3` as audio file and `rtf` as lines file.
+### normal mode
+
+```bash
+track2line /folder/path
+* Talk1_2.wav          ---> まずはジェネリック型。.wav
+* Talk1_3.wav          ---> ジェネリック型、もしくはジェネリクスとは.wav
+* include_whs_end .wav ---> include_whs_end.wav
+* Talk1_1.wav          ---> 100秒で分かるジェネリック型とトレイト.wav
+* Talk1_4.wav          ---> 以下のようにとても似ているが引数の型だけ.wav
+* non_line.wav         ---> _.wav
+
+continue?(y(yes or enter)/n)y        # if you ok, input y or enter, if you want to cancel, input n.
+success. all file is renamed.
+```
+
+### set mode
+
+This is the mode in which config(file) is changed.
+
+## when use extension other than `wav` or `txt`
+
+temporarily usages. 一時的な使用。
 
 ```bash
 # when using mp3 and rtf
 track2line -a mp3 -t rtf <FOLDER_PATH>
-# or (only one of them can be used.)
+# or (You can also use either one)
 track2line -a mp3
 ```
 
-### how to persist settings
+configuration persistence. 設定の永続化。
 
 ```bash
-# set mp3 as audio extension
-track2line --set_audio -a mp3
-# set rtf as text extension
-track2line --set_text -t rtf
-# set both
 track2line -s -a mp3 -t rtf
+# You can also use either one
+track2line -s -a mp3
+
+```
+
+reset configuration. 設定のリセット、
+
+```bash
+track2line -sr
 ```
 
 ## install
