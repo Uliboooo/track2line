@@ -251,7 +251,7 @@ dependencies = [
 
 [[package]]
 name = "track2line"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "clap",
  "get_input",

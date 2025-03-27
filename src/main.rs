@@ -164,6 +164,10 @@ fn main() -> Result<(), Error> {
             return Err(Error::Cancel);
         }
     }
+    // 根本的な解決ではないが、しかたないのでを使ってウィンドウが落ちるのを修正
+    if cfg!(target_os = "windows") {
+        get_input("please enter something.");
+    }
     Ok(())
 }
 
