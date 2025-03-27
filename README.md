@@ -1,8 +1,5 @@
 # Track2line cli
 
-- core functionality is composed of https://github.com/Uliboooo/track2line_lib.
-- gui ver. https://github.com/Uliboooo/track2line_gui
-
 ## what's tool
 
 this is tool that converts name of audio file provide by voisona talk, etc. by referring to a text file of the same name.
@@ -41,7 +38,7 @@ success. all file is renamed.
 
 ## usage as a cli
 
-by using `-y`, you can avoid interactive inputs."
+by using `-y`, you can avoid interactive inputs.
 
 ```bash
 # track2line -h
@@ -51,12 +48,13 @@ Arguments:
   [FOLDER_PATH]  a path of target folder
 
 Options:
-  -s, --set_mode                 set audio extension
+  -s, --set_mode                 set audio extension / set mode、設定などの永続化や表示、リセットを行う
                                  `track2line -s -a mp3(optional) -t rtf(optional)`
-  -a, --audio <AUDIO_EXTENSION>  change audio file extension. if use set-mode(-s), change config.
-  -r, --reset                    reset config. need -s.
-  -y, --yes                      don't request all interactive input
-  -t, --text <TXT_EXTENSION>     change text file extension.  if use set-mode(-s), change config.
+  -a, --audio <AUDIO_EXTENSION>  change audio file extension. if use set-mode(-s), change config. オーディオファイルの拡張子を変更可能。-sをつけて使うと永続化
+  -r, --reset                    reset config. requires -s.　-sと同時に使用することで設定をデフォルトのwavとtxtにリセット
+  -l, --list                     show config list. requires -s. -sと同時に使用することで現在の設定を表示
+  -y, --yes                      don't request all interactive input. (多分)全部のインタラクティブな入力を回避できる
+  -t, --text <TXT_EXTENSION>     change text file extension.  if use set-mode(-s), change config. テキストファイルの拡張子を変更可能。-sをつけて使うと永続化
   -h, --help                     Print help
 ```
 
@@ -81,25 +79,33 @@ This is the mode in which config(file) is changed.
 
 ## when use extension other than `wav` or `txt`
 
-temporarily usages. 一時的な使用。
+temporarily use. 一時的な拡張子の変更は引数の`-a`や`-t`オプションの引数で。
 
 ```bash
 # when using mp3 and rtf
-track2line -a mp3 -t rtf <FOLDER_PATH>
+track2line -a mp3 -t rtf [FOLDER_PATH]
 # or (You can also use either one)
 track2line -a mp3
 ```
 
-configuration persistence. 設定の永続化。
+configuration persistence. 設定の永続化。`-s`オプションでset modeになり設定を永続化できます。
 
 ```bash
 track2line -s -a mp3 -t rtf
 # You can also use either one
 track2line -s -a mp3
-
 ```
 
-reset configuration. 設定のリセット、
+show config list. you can see config list by using both `-s` and `-l`.
+
+```bash
+track2line -sl
+audio extension: wav
+txt extension: txt
+these config saved on /Users/user-name/Library/Application Support/track2line/config.toml
+```
+
+reset configuration. 設定のリセット。
 
 ```bash
 track2line -sr

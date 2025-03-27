@@ -1,7 +1,7 @@
 use clap::Parser;
 use get_input::{get_input, yes_no};
 use std::{error, fmt, path::PathBuf};
-use track2line_lib::{self as t2l};
+use track2line_lib::{self as t2l, config::Config};
 
 #[derive(Debug)]
 enum Error {
@@ -60,8 +60,14 @@ struct Args {
     audio_extension: Option<String>,
 
     /// reset config
-    #[arg(short = 'r', long = "reset", help = "reset config. need -s.")]
+    #[arg(short = 'r', long = "reset", help = "reset config. requires -s.")]
+    #[arg(requires = "set_mode")]
     reset: bool,
+
+    /// show config list
+    #[arg(short = 'l', long = "list", help = "show config list. requires -s")]
+    #[arg(requires = "set_mode")]
+    show_list: bool,
 
     /// don't request all interactive input
     #[arg(
@@ -90,7 +96,7 @@ fn get_user_input() -> Result<String, Error> {
 }
 
 fn main() -> Result<(), Error> {
-    let mut config = t2l::config::Config::load().map_err(Error::Config)?;
+    let mut config = Config::load().map_err(Error::Config)?;
 
     let args = Args::parse();
 
@@ -128,6 +134,11 @@ fn main() -> Result<(), Error> {
                     Err(e) => format!("failed... error: {}", e),
                 }
             );
+        }
+
+        if args.show_list {
+            let now_config = Config::load().map_err(Error::Config)?;
+            println!("{}", now_config);
         }
     } else {
         // normal mode

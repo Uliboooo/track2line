@@ -251,7 +251,7 @@ dependencies = [
 
 [[package]]
 name = "track2line"
-version = "0.11.0"
+version = "0.12.0"
 dependencies = [
  "clap",
  "get_input",
@@ -260,8 +260,8 @@ dependencies = [
 
 [[package]]
 name = "track2line_lib"
-version = "0.9.3"
-source = "git+https://github.com/Uliboooo/track2line_lib?tag=v0.9.3#09f63fd9eb50a81a5c7d0bbb810d161746496d5a"
+version = "0.10.0"
+source = "git+https://github.com/Uliboooo/track2line_lib?tag=v0.10.0#f8a67cd98aeba7a557eb607b4d8069fb5dae937b"
 dependencies = [
  "home",
  "serde",
