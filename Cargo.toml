@@ -1,7 +1,10 @@
 [package]
 name = "track2line"
-version = "0.12.1"
+version = "0.12.3"
 edition = "2024"
+
+[profile.release]
+opt-level = "z"
 
 [dependencies]
 track2line_lib = { git = "https://github.com/Uliboooo/track2line_lib", tag = "v0.10.0", features = [

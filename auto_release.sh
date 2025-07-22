@@ -25,7 +25,7 @@ cp ./target/x86_64-apple-darwin/release/${project_name} ./release/${project_name
 cp ./target/x86_64-unknown-linux-gnu/release/${project_name} ./release/${project_name}_linux_x86_64_$1
 cp ./target/x86_64-pc-windows-gnu/release/${project_name}.exe ./release/${project_name}_win_x86_64_$1.exe
 
-zip -j -9 ./release/${project_name}_mac_arm_$1.zip ./README.md ./release/${project_name}_mac_arm_$1
-zip -j -9 ./release/${project_name}_mac_x86_64_$1.zip ./README.md ./release/${project_name}_mac_x86_64_$1
-zip -j -9 ./release/${project_name}_linux_x86_64_$1.zip ./README.md ./release/${project_name}_linux_x86_64_$1
-zip -j -9 ./release/${project_name}_win_x86_64_$1.zip ./README.md ./release/${project_name}_win_x86_64_$1.exe
+# zip -j -9 ./release/${project_name}_mac_arm_$1.zip ./README.md ./release/${project_name}_mac_arm_$1
+# zip -j -9 ./release/${project_name}_mac_x86_64_$1.zip ./README.md ./release/${project_name}_mac_x86_64_$1
+# zip -j -9 ./release/${project_name}_linux_x86_64_$1.zip ./README.md ./release/${project_name}_linux_x86_64_$1
+# zip -j -9 ./release/${project_name}_win_x86_64_$1.zip ./README.md ./release/${project_name}_win_x86_64_$1.exe

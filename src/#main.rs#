@@ -1,4 +1,4 @@
-use clap::Parser;
+≈≈≈[Ouse clap::Parser;
 use get_input::{get_input, yes_no};
 use std::{error, fmt, path::PathBuf};
 use track2line_lib::{self as t2l, config::Config};
@@ -31,14 +31,13 @@ impl fmt::Display for Error {
             Error::NoInput => writeln!(f, "no input, pelse folder path."),
             Error::SomeErr => writeln!(f, "something error"),
             Error::Cancel => writeln!(f, "canceled."),
-            Error::T2L(e) => writeln!(f, "{e}"),
-            Error::Config(e) => writeln!(f, "{e}"),
+            Error::T2L(error) => writeln!(f, "{}", error),
+            Error::Config(error) => writeln!(f, "{}", error),
         }
     }
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "t2l", version, about = "It is a tool that converts the name of the audio file output by voisona Talk, etc. by referring to a text file containing the lines of the same name.")]
 #[command(verbatim_doc_comment)]
 struct Args {
     #[arg(
@@ -108,8 +107,8 @@ fn main() -> Result<(), Error> {
             println!(
                 "{}",
                 match config.save() {
-                    Ok(_) => format!("success. config changed to {v}"),
-                    Err(e) => format!("failed... error: {e}"),
+                    Ok(_) => format!("success. config changed to {}", v),
+                    Err(e) => format!("failed... error: {}", e),
                 }
             );
         }
@@ -118,8 +117,8 @@ fn main() -> Result<(), Error> {
             println!(
                 "{}",
                 match config.save() {
-                    Ok(_) => format!("success. config changed to {v}"),
-                    Err(e) => format!("failed... error: {e}"),
+                    Ok(_) => format!("success. config changed to {}", v),
+                    Err(e) => format!("failed... error: {}", e),
                 }
             );
         }
@@ -132,14 +131,14 @@ fn main() -> Result<(), Error> {
                 "{}",
                 match default_config.save() {
                     Ok(_) => "success. the configuration is reset.".to_string(),
-                    Err(e) => format!("failed... error: {e}"),
+                    Err(e) => format!("failed... error: {}", e),
                 }
             );
         }
 
         if args.show_list {
             let now_config = Config::load().map_err(Error::Config)?;
-            println!("{now_config}");
+            println!("{}", now_config);
         }
     } else {
         // normal mode
@@ -154,11 +153,11 @@ fn main() -> Result<(), Error> {
 
         let mut sets = t2l::PathSets::new(&dir, audio_ext, line_ext).map_err(Error::T2L)?;
         let check_list = sets.check().map_err(|_| Error::SomeErr)?;
-        println!("{check_list}");
+        println!("{}", check_list);
 
         if args.yes || get_input::yes_no("continue?(y(enter)/n)") {
             sets.rename().map_err(|_| Error::SomeErr)?;
-            // 👆で?しているの、成功したことを確認するためのメッセージを表示する
+            // 👆で?しているので、成功したことを確認するためのメッセージを表示する
             println!("success. all file is renamed.");
         } else {
             println!("ok, cancelled. your files has not changed.");
@@ -178,8 +177,8 @@ mod tests {
 
     #[test]
     fn config() {
-        let conf = Config::load();
-        println!("{conf:?}");
+        let con = Config::load();
+        println!("{:?}", con);
     }
 
     #[test]
@@ -189,6 +188,6 @@ mod tests {
             "wav",
             "txt",
         );
-        println!("{a:?}");
+        println!("{:?}", a);
     }
 }
