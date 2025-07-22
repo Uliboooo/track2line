@@ -38,7 +38,11 @@ impl fmt::Display for Error {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "t2l", version, about = "It is a tool that converts the name of the audio file output by voisona Talk, etc. by referring to a text file containing the lines of the same name.")]
+#[command(
+    name = "t2l",
+    version,
+    about = "It is a tool that converts the name of the audio file output by voisona Talk, etc. by referring to a text file containing the lines of the same name."
+)]
 #[command(verbatim_doc_comment)]
 struct Args {
     #[arg(
